@@ -185,7 +185,7 @@ export function AdminProjectList({ initialProjects, initialError = "" }: AdminPr
           {projects.map((project) => (
             <div
               key={project.id}
-              className="grid gap-4 border-b border-line py-5 text-[13px] lg:grid-cols-[84px_1.4fr_0.8fr_0.8fr_0.5fr_0.6fr_0.6fr_auto] lg:items-center"
+              className="grid gap-4 border-b border-line py-5 text-[13px] lg:grid-cols-[84px_1.4fr_0.8fr_0.8fr_0.6fr_0.6fr_0.6fr_auto] lg:items-center"
             >
               <div className="aspect-[3/2] w-24 bg-[#f6f6f6] lg:w-full">
                 {project.cover_image_url ? (
@@ -203,7 +203,7 @@ export function AdminProjectList({ initialProjects, initialError = "" }: AdminPr
                 <p>{project.location}</p>
               </div>
               <p className="text-muted">{project.area}</p>
-              <p>{project.year}</p>
+              <p>{project.year ? String(project.year) : ""}</p>
               <button
                 type="button"
                 onClick={() => toggleProject(project, "published")}

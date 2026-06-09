@@ -48,7 +48,7 @@ export default async function AdminProjectsPage() {
             <h1 className="text-[18px] font-normal">{isAuthed ? "프로젝트 관리" : "관리자 로그인"}</h1>
             <p className="max-w-2xl text-[13px] leading-6 text-muted">
               {isAuthed
-                ? "등록된 포트폴리오를 수정, 공개 전환, 대표 노출 전환, 삭제할 수 있습니다."
+                ? "기존 포트폴리오의 공개 상태, 대표 노출, 이미지와 내용을 관리합니다."
                 : "프로젝트 관리 화면을 사용하려면 관리자 비밀번호를 입력해주세요."}
             </p>
           </div>

@@ -245,13 +245,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
       previewUrl: URL.createObjectURL(file),
     }));
 
-    setImages((current) => {
-      const mergedImages = [...current, ...nextImages];
-      if (coverImageId === manualCoverId && !form.coverImageUrl.trim() && mergedImages[0]) {
-        setCoverImageId(mergedImages[0].id);
-      }
-      return mergedImages;
-    });
+    setImages((current) => [...current, ...nextImages]);
   }
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
@@ -393,7 +387,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
         console.error("[Admin edit] Project update failed.", projectError);
 
         if (isDuplicateSlugError(projectError)) {
-          throw new Error("이미 사용 중인 slug입니다.");
+          throw new Error("이미 사용 중인 slug입니다. slug를 바꿔주세요.");
         }
 
         throw new Error(`프로젝트 수정 실패: ${formatSupabaseError(projectError)}`);

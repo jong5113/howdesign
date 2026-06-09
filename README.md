@@ -302,3 +302,66 @@ ADMIN_PASSWORD=your_admin_password
 - `https://howdesign.vercel.app/portfolio/daedong-eel-yeouido`
 - `https://howdesign.vercel.app/admin/projects`
 - `https://howdesign.vercel.app/api/debug/portfolio`
+
+## 관리자 포트폴리오 관리
+
+- 새 등록: `/admin/projects/new`
+- 기존 목록/관리: `/admin/projects`
+- 기존 수정: `/admin/projects/[id]/edit`
+
+관리자 화면은 `ADMIN_PASSWORD` 환경변수와 관리자 cookie 인증을 사용합니다. Vercel에서도 `ADMIN_PASSWORD`를 Environment Variables에 추가한 뒤 Redeploy 해야 합니다.
+
+관리 목록에서는 `published=false` 프로젝트도 함께 표시됩니다. `published`를 끄면 공개 포트폴리오 페이지에 보이지 않고, `featured`를 켜면 메인 노출 대상이 됩니다.
+
+수정 페이지에서는 아래 작업을 할 수 있습니다.
+
+- 프로젝트 기본 정보 수정
+- `Date of Completion` 자유 텍스트 입력: 예 `May. 2026`, `2026. 05`, `2026`
+- `cover_image_url` 직접 수정
+- 갤러리 이미지 중 대표 이미지 지정
+- 이미지 추가 업로드
+- 이미지 삭제
+- 이미지 순서 `Up` / `Down` 변경
+- 저장 후 `View Project`로 공개 상세페이지 확인
+
+프로젝트 삭제 시 `portfolio_projects` row를 삭제합니다. `portfolio_images`는 `on delete cascade`로 함께 삭제됩니다. 가능한 경우 Supabase Storage의 파일도 같이 삭제합니다. Storage 삭제가 실패하면 화면에 오류가 표시되며, Supabase Storage에서 수동 정리할 수 있습니다.
+
+RLS를 사용하는 경우 관리자 기능에는 다음 권한이 필요합니다.
+
+- `portfolio_projects`: select, insert, update, delete
+- `portfolio_images`: select, insert, update, delete
+- `storage.objects`: select, insert, update, delete for bucket `portfolio`
+
+예시 정책:
+
+```sql
+alter table portfolio_projects enable row level security;
+alter table portfolio_images enable row level security;
+
+create policy "Allow public read portfolio projects"
+on portfolio_projects for select
+using (true);
+
+create policy "Allow admin write portfolio projects"
+on portfolio_projects for all
+using (true)
+with check (true);
+
+create policy "Allow public read portfolio images"
+on portfolio_images for select
+using (true);
+
+create policy "Allow admin write portfolio images"
+on portfolio_images for all
+using (true)
+with check (true);
+
+create policy "Allow public read portfolio storage"
+on storage.objects for select
+using (bucket_id = 'portfolio');
+
+create policy "Allow admin write portfolio storage"
+on storage.objects for all
+using (bucket_id = 'portfolio')
+with check (bucket_id = 'portfolio');
+```
