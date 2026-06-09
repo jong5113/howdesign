@@ -11,7 +11,7 @@ export function PortfolioGrid({ items }: PortfolioGridProps) {
   }
 
   return (
-    <div className="grid gap-x-4 gap-y-9 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+    <div className="grid gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {items.map((item, index) => (
         <PortfolioCard key={item.slug} item={item} priority={index < 4} />
       ))}

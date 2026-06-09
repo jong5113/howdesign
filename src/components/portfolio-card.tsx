@@ -21,13 +21,13 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
           fill
           priority={priority}
           unoptimized
-          sizes="(min-width: 1536px) 24vw, (min-width: 1024px) 32vw, (min-width: 640px) 48vw, 100vw"
+          sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 46vw, 100vw"
           className="object-cover"
         />
       </figure>
       <div className="mt-2.5 grid gap-1 leading-none">
-        <h2 className="text-[12px] font-normal text-foreground sm:text-[13px]">{item.title}</h2>
-        <p className="text-[11px] text-muted sm:text-[12px]">
+        <h2 className="text-[14px] font-normal text-foreground">{item.title}</h2>
+        <p className="text-[12px] text-muted">
           {categoryEnglishLabels[item.category]} / {item.location} / {item.year}
         </p>
       </div>

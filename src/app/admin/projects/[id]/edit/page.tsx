@@ -1,0 +1,51 @@
+import { cookies } from "next/headers";
+import Link from "next/link";
+
+import { AdminLoginForm } from "@/components/admin-login-form";
+import { AdminLogoutButton } from "@/components/admin-logout-button";
+import { AdminProjectEditForm } from "@/components/admin-project-edit-form";
+import { ADMIN_COOKIE_NAME, isAdminSession } from "@/lib/admin-auth";
+
+export const metadata = {
+  title: "Edit Project",
+};
+
+type EditProjectPageProps = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+export default async function EditProjectPage({ params }: EditProjectPageProps) {
+  const { id } = await params;
+  const cookieStore = await cookies();
+  const isAuthed = isAdminSession(cookieStore.get(ADMIN_COOKIE_NAME)?.value);
+
+  return (
+    <div className="px-5 pb-16 pt-36 sm:px-10 sm:pt-44 lg:px-12">
+      <main className="mx-auto grid max-w-[1760px] gap-10">
+        <header className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-start">
+          <div className="grid gap-3">
+            <p className="text-[11px] uppercase tracking-[0.09em] text-muted">Admin</p>
+            <h1 className="text-[18px] font-normal">{isAuthed ? "프로젝트 수정" : "관리자 로그인"}</h1>
+          </div>
+          {isAuthed ? <AdminLogoutButton /> : null}
+          <div className="grid gap-2 text-[13px] leading-6 text-muted sm:col-span-2">
+            <p>
+              {isAuthed
+                ? "프로젝트 정보와 이미지 순서, 대표 이미지, 공개 여부를 수정합니다."
+                : "프로젝트 수정 화면을 사용하려면 관리자 비밀번호를 입력해주세요."}
+            </p>
+            {isAuthed ? (
+              <Link href="/admin/projects" className="w-fit text-[12px] uppercase tracking-[0.09em] underline">
+                Back to Projects
+              </Link>
+            ) : null}
+          </div>
+        </header>
+
+        {isAuthed ? <AdminProjectEditForm projectId={id} /> : <AdminLoginForm />}
+      </main>
+    </div>
+  );
+}

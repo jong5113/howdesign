@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="px-5 pb-16 pt-24 sm:px-10 lg:px-12">
+    <div className="px-5 pb-16 pt-36 sm:px-10 sm:pt-44 lg:px-12">
       <section className="mx-auto flex min-h-[58vh] max-w-[1760px] flex-col justify-between gap-14">
         <header>
           <p className="text-[12px] font-normal uppercase tracking-[0.09em]">Contact</p>

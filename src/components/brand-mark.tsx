@@ -28,11 +28,11 @@ export function BrandMark({ placement }: BrandMarkProps) {
   const logoPath = getLogoPath();
   const logoClassName =
     placement === "header"
-      ? "h-auto w-[92px] object-contain sm:w-[118px]"
+      ? "h-auto w-[156px] object-contain sm:w-[224px]"
       : "h-auto w-[76px] object-contain";
 
   return (
-    <Link href="/" className="inline-flex items-center">
+    <Link href="/" className="inline-flex items-center justify-center">
       {logoPath ? (
         <Image
           src={logoPath}
@@ -43,7 +43,7 @@ export function BrandMark({ placement }: BrandMarkProps) {
           priority={placement === "header"}
         />
       ) : (
-        <span className="text-[12px] font-normal tracking-tight">{siteConfig.name}</span>
+        <span className="text-center text-[16px] font-normal tracking-tight sm:text-[18px]">{siteConfig.name}</span>
       )}
     </Link>
   );

@@ -10,8 +10,8 @@ export default async function HomePage() {
   const featuredPortfolios = await getFeaturedPortfolios();
 
   return (
-    <div className="px-5 pb-16 pt-24 sm:px-10 lg:px-12">
-      <div className="mx-auto max-w-[1760px]">
+    <div className="px-5 pb-16 pt-36 sm:px-10 sm:pt-44 lg:px-12">
+      <div className="mx-auto max-w-[1440px]">
         <div className="mb-6 flex items-center justify-between text-[11px] uppercase tracking-[0.09em] text-muted">
           <p>Works</p>
           <Link href="/portfolio" className="text-foreground underline-offset-4 hover:underline">

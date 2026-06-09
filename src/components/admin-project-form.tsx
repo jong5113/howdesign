@@ -3,6 +3,7 @@
 import { ChangeEvent, DragEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
+import { createFilePath, createSlug } from "@/lib/admin-project-utils";
 import { hasSupabaseConfig, supabaseClient } from "@/lib/supabase/client";
 import type { PortfolioCategory } from "@/lib/types";
 
@@ -55,29 +56,6 @@ const initialFormState: ProjectFormState = {
   featured: false,
   published: true,
 };
-
-function createSlug(title: string) {
-  const slug = title
-    .trim()
-    .toLowerCase()
-    .normalize("NFKC")
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/^-+|-+$/g, "");
-
-  return slug || `project-${Date.now()}`;
-}
-
-function createFilePath(slug: string, file: File, index: number) {
-  const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
-  const safeName = file.name
-    .replace(/\.[^/.]+$/, "")
-    .normalize("NFKC")
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase();
-
-  return `${slug}/${String(index + 1).padStart(2, "0")}-${Date.now()}-${safeName || "image"}.${extension}`;
-}
 
 function formatSupabaseError(error: SupabaseErrorLike) {
   const parts = [
