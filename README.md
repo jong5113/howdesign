@@ -47,6 +47,7 @@ npm.cmd run dev
 - `http://localhost:3000/portfolio/commercial`
 - `http://localhost:3000/portfolio/daedong-eel-yeouido`
 - `http://localhost:3000/contact`
+- `http://localhost:3000/api/debug/portfolio`
 
 `/portfolio/[slug]` 상세페이지는 Supabase의 `portfolio_projects.slug` 값을 그대로 사용합니다. 예를 들어 `slug`가 `daedong-eel-yeouido`이면 상세 주소는 `http://localhost:3000/portfolio/daedong-eel-yeouido`입니다.
 
@@ -60,6 +61,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 Supabase 환경변수가 있고 공개된 데이터가 존재하면 Supabase 데이터가 우선 표시됩니다. 환경변수가 없거나 Supabase 연결에 실패하거나 데이터가 비어 있을 때만 `src/lib/sample-portfolio.ts`의 샘플 데이터로 화면이 표시됩니다.
+
+`.env.local`은 로컬 개발 전용 파일입니다. GitHub에 올라가지 않으며 Vercel에도 자동 적용되지 않습니다. Vercel 배포 사이트에서 Supabase 데이터를 보려면 Vercel 프로젝트의 Environment Variables에 직접 입력해야 합니다.
 
 ## 로고 적용 방법
 
@@ -125,6 +128,26 @@ create index if not exists portfolio_images_project_order_idx
 - `/`: `featured = true`이고 `published = true`인 데이터만 노출합니다.
 - 정렬: `display_order` 오름차순, 그다음 `created_at` 내림차순입니다.
 - `/portfolio/[slug]`: 해당 `slug`의 프로젝트와 `portfolio_images` 목록을 함께 가져옵니다.
+- Supabase에 `published = true` 데이터가 1개라도 있으면 샘플 데이터와 섞지 않습니다.
+- 샘플 데이터는 Supabase 환경변수가 없거나, Supabase 조회가 실패하거나, 공개 데이터가 완전히 비어 있을 때만 사용합니다.
+
+## 개발 확인용 Debug API
+
+Supabase 연결과 이미지 URL 반영 여부를 확인하기 위해 개발 확인용 API를 제공합니다.
+
+- 로컬: `http://localhost:3000/api/debug/portfolio`
+- 배포: `https://howdesign.vercel.app/api/debug/portfolio`
+- 특정 slug 확인: `/api/debug/portfolio?slug=daedong-eel-yeouido`
+
+이 API는 아래 정보를 JSON으로 보여줍니다.
+
+- Supabase URL 존재 여부와 URL 앞부분
+- Supabase anon key 존재 여부
+- 조회된 프로젝트의 `title`, `slug`, `cover_image_url`, `published`, `featured`
+- 조회된 상세 이미지의 `image_url`, `alt`, `display_order`
+- Supabase 조회 에러 메시지
+
+보안을 위해 Supabase anon key 전체 값은 절대 노출하지 않고 존재 여부만 표시합니다.
 
 ## GitHub 업로드
 
@@ -143,15 +166,23 @@ git push -u origin main
 
 1. GitHub에 업로드한 저장소를 Vercel에서 Import합니다.
 2. Framework Preset은 Next.js를 선택합니다.
-3. Environment Variables에 아래 값을 추가합니다.
+3. Vercel `Settings → Environment Variables`에 아래 값을 직접 추가합니다.
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-4. Build Command는 `npm run build`를 사용합니다.
-5. 배포 후 Supabase Storage 이미지 URL이 정상 표시되는지 확인합니다.
+4. `.env.local`은 로컬 전용이므로 Vercel에는 자동 반영되지 않습니다.
+5. 환경변수 입력 또는 수정 후 `Deployments → Redeploy`를 반드시 실행합니다.
+6. Build Command는 `npm run build`를 사용합니다.
+7. 배포 후 아래 주소에서 Supabase 데이터와 이미지 URL이 정상 표시되는지 확인합니다.
+
+- `https://howdesign.vercel.app`
+- `https://howdesign.vercel.app/portfolio`
+- `https://howdesign.vercel.app/portfolio/commercial`
+- `https://howdesign.vercel.app/portfolio/daedong-eel-yeouido`
+- `https://howdesign.vercel.app/api/debug/portfolio`
 
 ## 다음 단계
 

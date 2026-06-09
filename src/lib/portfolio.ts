@@ -7,7 +7,7 @@ import {
 } from "@/lib/sample-portfolio";
 import type { PortfolioCategory, PortfolioItem } from "@/lib/types";
 
-const PROJECT_SELECT_COLUMNS = `
+export const PROJECT_SELECT_COLUMNS = `
   id,
   title,
   slug,
@@ -26,7 +26,7 @@ const PROJECT_SELECT_COLUMNS = `
   created_at
 `;
 
-const IMAGE_SELECT_COLUMNS = `
+export const IMAGE_SELECT_COLUMNS = `
   id,
   project_id,
   image_url,
@@ -35,7 +35,7 @@ const IMAGE_SELECT_COLUMNS = `
   created_at
 `;
 
-type PortfolioProjectRow = {
+export type PortfolioProjectRow = {
   id: string;
   title: string | null;
   slug: string | null;
@@ -54,7 +54,7 @@ type PortfolioProjectRow = {
   created_at: string | null;
 };
 
-type PortfolioImageRow = {
+export type PortfolioImageRow = {
   id: string;
   project_id: string;
   image_url: string | null;
@@ -71,7 +71,7 @@ function normalizeText(value: string | null | undefined) {
   return value?.trim() || "";
 }
 
-function normalizeProject(
+export function normalizeProject(
   project: PortfolioProjectRow,
   images: PortfolioImageRow[] = [],
 ): PortfolioItem | null {
@@ -117,6 +117,7 @@ function normalizeProject(
 
 async function fetchProjects(options: { featured?: boolean; category?: PortfolioCategory } = {}) {
   if (!hasSupabaseConfig || !supabaseClient) {
+    console.error("[Supabase] Portfolio query skipped because Supabase environment variables are missing.");
     return null;
   }
 
@@ -138,19 +139,21 @@ async function fetchProjects(options: { featured?: boolean; category?: Portfolio
 
     const { data, error } = await query;
 
-    if (error || !data || data.length === 0) {
+    if (error) {
+      console.error("[Supabase] Failed to fetch portfolio_projects.", error.message);
       return null;
     }
 
-    return data
+    return (data || [])
       .map((project) => normalizeProject(project as PortfolioProjectRow))
       .filter((project): project is PortfolioItem => Boolean(project));
-  } catch {
+  } catch (error) {
+    console.error("[Supabase] Unexpected portfolio_projects fetch error.", error);
     return null;
   }
 }
 
-async function fetchProjectImages(projectId: string) {
+export async function fetchProjectImages(projectId: string) {
   if (!hasSupabaseConfig || !supabaseClient) {
     return [];
   }
@@ -163,6 +166,10 @@ async function fetchProjectImages(projectId: string) {
     .order("created_at", { ascending: true });
 
   if (error || !data) {
+    if (error) {
+      console.error("[Supabase] Failed to fetch portfolio_images.", error.message);
+    }
+
     return [];
   }
 
@@ -171,22 +178,52 @@ async function fetchProjectImages(projectId: string) {
 
 export async function getPublishedPortfolios() {
   const portfolios = await fetchProjects();
-  return portfolios && portfolios.length > 0 ? portfolios : getPublishedSamplePortfolios();
+
+  if (portfolios === null || portfolios.length === 0) {
+    return getPublishedSamplePortfolios();
+  }
+
+  return portfolios;
 }
 
 export async function getFeaturedPortfolios() {
   const portfolios = await fetchProjects({ featured: true });
-  return portfolios && portfolios.length > 0 ? portfolios : getFeaturedSamplePortfolios();
+
+  if (portfolios === null) {
+    return getFeaturedSamplePortfolios();
+  }
+
+  if (portfolios.length > 0) {
+    return portfolios;
+  }
+
+  const publishedPortfolios = await fetchProjects();
+
+  if (publishedPortfolios === null || publishedPortfolios.length === 0) {
+    return getFeaturedSamplePortfolios();
+  }
+
+  return [];
 }
 
 export async function getPortfoliosByCategory(category: PortfolioCategory) {
   const portfolios = await fetchProjects({ category });
 
-  if (portfolios && portfolios.length > 0) {
+  if (portfolios === null) {
+    return getPublishedSamplePortfolios().filter((portfolio) => portfolio.category === category);
+  }
+
+  if (portfolios.length > 0) {
     return portfolios;
   }
 
-  return getPublishedSamplePortfolios().filter((portfolio) => portfolio.category === category);
+  const publishedPortfolios = await fetchProjects();
+
+  if (publishedPortfolios === null || publishedPortfolios.length === 0) {
+    return getPublishedSamplePortfolios().filter((portfolio) => portfolio.category === category);
+  }
+
+  return [];
 }
 
 export async function getPortfolioBySlug(slug: string) {
@@ -202,6 +239,10 @@ export async function getPortfolioBySlug(slug: string) {
         .limit(1)
         .maybeSingle();
 
+      if (error) {
+        console.error("[Supabase] Failed to fetch portfolio project by slug.", error.message);
+      }
+
       if (!error && data) {
         const images = await fetchProjectImages((data as PortfolioProjectRow).id);
         const portfolio = normalizeProject(data as PortfolioProjectRow, images);
@@ -210,7 +251,14 @@ export async function getPortfolioBySlug(slug: string) {
           return portfolio;
         }
       }
-    } catch {
+
+      const publishedPortfolios = await fetchProjects();
+
+      if (publishedPortfolios && publishedPortfolios.length > 0) {
+        return undefined;
+      }
+    } catch (error) {
+      console.error("[Supabase] Unexpected portfolio detail fetch error.", error);
       return getPortfolioSampleBySlug(normalizedSlug);
     }
   }
