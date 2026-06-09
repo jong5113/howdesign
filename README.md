@@ -137,17 +137,28 @@ Supabase 연결과 이미지 URL 반영 여부를 확인하기 위해 개발 확
 
 - 로컬: `http://localhost:3000/api/debug/portfolio`
 - 배포: `https://howdesign.vercel.app/api/debug/portfolio`
-- 특정 slug 확인: `/api/debug/portfolio?slug=daedong-eel-yeouido`
+- 특정 slug 확인: `https://howdesign.vercel.app/api/debug/portfolio?slug=daedong-eel-yeouido`
 
 이 API는 아래 정보를 JSON으로 보여줍니다.
 
 - Supabase URL 존재 여부와 URL 앞부분
 - Supabase anon key 존재 여부
-- 조회된 프로젝트의 `title`, `slug`, `cover_image_url`, `published`, `featured`
-- 조회된 상세 이미지의 `image_url`, `alt`, `display_order`
+- 공개 프로젝트 수 `publicProjectsCount`
+- 최대 10개 프로젝트 미리보기 `allProjectsPreview`
+- slug 조건만 적용한 `rawProjectBySlug`
+- slug와 `published = true` 조건을 함께 적용한 `publishedProjectBySlug`
+- 조회된 상세 이미지의 `image_url`, `display_order`
 - Supabase 조회 에러 메시지
 
 보안을 위해 Supabase anon key 전체 값은 절대 노출하지 않고 존재 여부만 표시합니다.
+
+디버그 결과는 아래 기준으로 확인합니다.
+
+- `publicProjectsCount`가 `0`이면 Vercel이 다른 Supabase 프로젝트를 보고 있거나 RLS/환경변수 문제일 가능성이 큽니다.
+- `rawProjectBySlug`는 있는데 `publishedProjectBySlug`가 `null`이면 해당 프로젝트의 `published` 값이 `false`일 가능성이 큽니다.
+- `rawProjectBySlug`도 `null`이면 `slug` 값이 다르거나 Vercel이 다른 Supabase 프로젝트를 보고 있을 가능성이 큽니다.
+- `allProjectsPreview`에 데이터가 보이면 실제로 Vercel에서 접근 가능한 프로젝트의 `slug`, `published`, `category` 값을 확인합니다.
+- `error` 또는 `errors`에 메시지가 있으면 RLS 정책, 테이블명, 컬럼명, 환경변수를 우선 확인합니다.
 
 ## GitHub 업로드
 
