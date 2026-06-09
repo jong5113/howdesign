@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { categoryEnglishLabels } from "@/lib/sample-portfolio";
+import { getAreaLine, getProjectTitleLine, getSiteLine } from "@/lib/portfolio-display";
 import type { PortfolioItem } from "@/lib/types";
 
 type PortfolioCardProps = {
@@ -11,6 +11,8 @@ type PortfolioCardProps = {
 
 export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
   const coverImage = item.coverImageUrl || item.coverImage;
+  const siteLine = getSiteLine(item);
+  const areaLine = getAreaLine(item);
 
   return (
     <Link href={`/portfolio/${item.slug}`} className="block">
@@ -25,11 +27,12 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
           className="object-cover"
         />
       </figure>
-      <div className="mt-2.5 grid gap-1 leading-none">
-        <h2 className="text-[14px] font-normal text-foreground">{item.title}</h2>
-        <p className="text-[12px] text-muted">
-          {categoryEnglishLabels[item.category]} / {item.location} / {item.year}
-        </p>
+      <div className="mt-3 grid gap-1.5 leading-tight">
+        <h2 className="text-[13px] font-normal uppercase tracking-[0.02em] text-foreground">
+          {getProjectTitleLine(item)}
+        </h2>
+        {siteLine ? <p className="text-[12px] text-muted">{siteLine}</p> : null}
+        {areaLine ? <p className="text-[12px] text-muted">{areaLine}</p> : null}
       </div>
     </Link>
   );

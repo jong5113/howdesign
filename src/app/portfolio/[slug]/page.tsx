@@ -1,9 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ProjectGallerySlider } from "@/components/project-gallery-slider";
 import { getPortfolioBySlug } from "@/lib/portfolio";
-import { categoryEnglishLabels } from "@/lib/sample-portfolio";
+import { getDetailInfoRows } from "@/lib/portfolio-display";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -32,56 +31,53 @@ export default async function PortfolioDetailPage({ params }: PortfolioDetailPag
   }
 
   const coverImage = portfolio.coverImageUrl || portfolio.coverImage;
+  const detailRows = getDetailInfoRows(portfolio);
   const galleryImages = [coverImage, ...portfolio.gallery]
     .filter(Boolean)
-    .filter((image, index, images) => images.indexOf(image) === index)
-    .map((image, index) => ({
-      src: image,
-      alt: `${portfolio.title} 이미지 ${index + 1}`,
-    }));
-  const detailMeta = [
-    categoryEnglishLabels[portfolio.category],
-    portfolio.location,
-    portfolio.area,
-    portfolio.scope,
-    portfolio.duration,
-    String(portfolio.year),
-  ].filter(Boolean);
+    .filter((image, index, images) => images.indexOf(image) === index);
 
   return (
-    <div className="px-5 pb-16 pt-36 sm:px-10 sm:pt-44 lg:px-12">
-      <article className="mx-auto max-w-[1320px]">
-        <div className="mb-8 flex items-center justify-between text-[13px] uppercase tracking-[0.09em] text-muted">
-          <Link href="/portfolio" className="underline-offset-4 hover:underline">
-            Back to Portfolio
-          </Link>
-          <Link href="/contact" className="underline-offset-4 hover:underline">
-            Contact
-          </Link>
-        </div>
+    <div className="px-5 pb-16 pt-36 sm:px-6 sm:pt-44 lg:px-6">
+      <article className="mx-auto grid max-w-[1760px] gap-10 lg:grid-cols-[280px_1fr] lg:gap-12 xl:grid-cols-[320px_1fr]">
+        <aside className="grid content-start gap-12 text-[12px] leading-6 text-muted lg:sticky lg:top-44 lg:self-start">
+          <nav className="grid gap-1.5 text-[11px] uppercase tracking-[0.1em]" aria-label="상세 페이지 메뉴">
+            <Link href="/portfolio" className="w-fit text-foreground underline-offset-4 hover:underline">
+              All
+            </Link>
+            <Link href="/portfolio/residential" className="w-fit underline-offset-4 hover:underline">
+              Residential
+            </Link>
+            <Link href="/portfolio/commercial" className="w-fit underline-offset-4 hover:underline">
+              Commercial
+            </Link>
+            <Link href="/contact" className="w-fit underline-offset-4 hover:underline">
+              Contact
+            </Link>
+          </nav>
 
-        <header className="mb-5 max-w-5xl">
-          <h1 className="text-[21px] font-normal leading-8 sm:text-[24px]">{portfolio.title}</h1>
-          {portfolio.subtitle ? <p className="mt-1 text-[12px] text-muted">{portfolio.subtitle}</p> : null}
-          <p className="mt-3 text-[14px] uppercase leading-6 tracking-[0.09em] text-muted">
-            {detailMeta.join(" / ")}
-          </p>
-        </header>
+          <section className="grid gap-5">
+            {detailRows.map((row) => (
+              <div key={row.label} className="grid gap-1.5">
+                <p className="text-[10px] uppercase tracking-[0.1em] text-muted">{row.label}</p>
+                <p className="text-[12px] leading-6 text-foreground">{row.value}</p>
+              </div>
+            ))}
+          </section>
 
-        <ProjectGallerySlider images={galleryImages} />
+        </aside>
 
-        {portfolio.description ? (
-          <p className="max-w-2xl py-8 text-[13px] leading-6 text-muted sm:py-10">{portfolio.description}</p>
-        ) : null}
-
-        <div className="mt-10 flex gap-6 text-[13px] uppercase tracking-[0.09em] text-muted">
-          <Link href="/portfolio" className="underline-offset-4 hover:underline">
-            Back to Portfolio
-          </Link>
-          <Link href="/contact" className="underline-offset-4 hover:underline">
-            Contact
-          </Link>
-        </div>
+        <section className="columns-1 gap-1.5 sm:columns-2 lg:columns-3" aria-label={`${portfolio.title} 이미지 갤러리`}>
+          {galleryImages.map((image, index) => (
+            <figure key={`${portfolio.slug}-${index}`} className="mb-1.5 break-inside-avoid">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={image}
+                alt={`${portfolio.title} 이미지 ${index + 1}`}
+                className="h-auto w-full"
+              />
+            </figure>
+          ))}
+        </section>
       </article>
     </div>
   );

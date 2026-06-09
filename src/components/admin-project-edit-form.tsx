@@ -438,11 +438,12 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
 
       <div className="grid gap-5 lg:grid-cols-2">
         <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">
-          Title
+          Title / 현장명(한글)
           <input
             value={form.title}
             onChange={(event) => updateField("title", event.target.value)}
             className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
+            placeholder="예: 대동장어 여의도점"
             required
           />
         </label>
@@ -467,21 +468,31 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
           </select>
         </label>
         <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">
-          Year
+          Date of Completion / Year
           <input
             value={form.year}
             onChange={(event) => updateField("year", event.target.value)}
             className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
             inputMode="numeric"
+            placeholder="예: 2026"
           />
         </label>
-        {(["subtitle", "location", "area", "scope", "duration"] as const).map((field) => (
+        {[
+          { field: "subtitle", label: "Subtitle / 현장명(영문)", placeholder: "예: DAEDONG EEL YEOUIDO" },
+          { field: "location", label: "Site / 위치", placeholder: "예: 서울 여의도" },
+          { field: "area", label: "Area", placeholder: "예: 198.9 m2 / 60 py" },
+          { field: "scope", label: "Scope", placeholder: "예: Interior Design" },
+          { field: "duration", label: "Duration", placeholder: "예: 8 weeks" },
+        ].map(({ field, label, placeholder }) => (
           <label key={field} className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">
-            {field}
+            {label}
             <input
-              value={form[field]}
-              onChange={(event) => updateField(field, event.target.value)}
+              value={form[field as keyof Pick<typeof form, "subtitle" | "location" | "area" | "scope" | "duration">]}
+              onChange={(event) =>
+                updateField(field as keyof Pick<typeof form, "subtitle" | "location" | "area" | "scope" | "duration">, event.target.value)
+              }
               className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
+              placeholder={placeholder}
             />
           </label>
         ))}
