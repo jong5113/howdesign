@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ProjectLightboxGallery } from "@/components/project-lightbox-gallery";
 import { getPortfolioBySlug } from "@/lib/portfolio";
 import { getDetailInfoRows } from "@/lib/portfolio-display";
 
@@ -66,18 +67,13 @@ export default async function PortfolioDetailPage({ params }: PortfolioDetailPag
 
         </aside>
 
-        <section className="columns-1 gap-1.5 sm:columns-2 lg:columns-3" aria-label={`${portfolio.title} 이미지 갤러리`}>
-          {galleryImages.map((image, index) => (
-            <figure key={`${portfolio.slug}-${index}`} className="mb-1.5 break-inside-avoid">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={image}
-                alt={`${portfolio.title} 이미지 ${index + 1}`}
-                className="h-auto w-full"
-              />
-            </figure>
-          ))}
-        </section>
+        <ProjectLightboxGallery
+          images={galleryImages.map((image, index) => ({
+            src: image,
+            alt: `${portfolio.title} 이미지 ${index + 1}`,
+          }))}
+          className="columns-1 gap-1.5 sm:columns-2 lg:columns-3"
+        />
       </article>
     </div>
   );
