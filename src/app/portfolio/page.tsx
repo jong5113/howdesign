@@ -14,7 +14,7 @@ export default async function PortfolioPage() {
   const portfolios = await getPublishedPortfolios();
 
   return (
-    <div className="px-4 pb-14 pt-14 sm:px-6 lg:px-8">
+    <div className="px-5 pb-16 pt-24 sm:px-10 lg:px-12">
       <div className="mx-auto max-w-[1760px]">
         <PageIntro eyebrow="Works" title="Portfolio" />
         <PortfolioFilter active="all" />

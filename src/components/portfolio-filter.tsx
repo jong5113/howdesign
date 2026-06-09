@@ -16,7 +16,7 @@ const filters: Array<{ href: string; label: string; value: PortfolioFilterValue 
 
 export function PortfolioFilter({ active }: PortfolioFilterProps) {
   return (
-    <nav className="mb-5 flex flex-wrap gap-5 text-[10px] uppercase tracking-wide" aria-label="포트폴리오 필터">
+    <nav className="mb-6 flex flex-wrap gap-5 text-[11px] uppercase tracking-[0.09em]" aria-label="포트폴리오 필터">
       {filters.map((filter) => (
         <Link
           key={filter.value}

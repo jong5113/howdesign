@@ -14,7 +14,7 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
 
   return (
     <Link href={`/portfolio/${item.slug}`} className="block">
-      <figure className="relative aspect-[4/5] overflow-hidden">
+      <figure className="relative aspect-[3/2] overflow-hidden">
         <Image
           src={coverImage}
           alt={item.title}
@@ -25,9 +25,9 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
           className="object-cover"
         />
       </figure>
-      <div className="mt-2 grid gap-0.5 text-[10px] leading-4">
-        <h2 className="font-normal">{item.title}</h2>
-        <p className="text-muted">
+      <div className="mt-2.5 grid gap-1 leading-none">
+        <h2 className="text-[12px] font-normal text-foreground sm:text-[13px]">{item.title}</h2>
+        <p className="text-[11px] text-muted sm:text-[12px]">
           {categoryEnglishLabels[item.category]} / {item.location} / {item.year}
         </p>
       </div>

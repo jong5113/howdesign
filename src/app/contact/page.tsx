@@ -6,13 +6,13 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="px-4 pb-14 pt-14 sm:px-6 lg:px-8">
-      <section className="mx-auto flex min-h-[60vh] max-w-[1760px] flex-col justify-between gap-16">
-        <header className="border-b border-line pb-3">
-          <p className="text-xs font-normal uppercase tracking-wide">Contact</p>
+    <div className="px-5 pb-16 pt-24 sm:px-10 lg:px-12">
+      <section className="mx-auto flex min-h-[58vh] max-w-[1760px] flex-col justify-between gap-14">
+        <header>
+          <p className="text-[12px] font-normal uppercase tracking-[0.09em]">Contact</p>
         </header>
 
-        <div className="grid max-w-5xl gap-7 text-base font-normal leading-7 sm:text-xl sm:leading-9">
+        <div className="grid max-w-4xl gap-6 text-[15px] font-normal leading-7 sm:text-[19px] sm:leading-9">
           <p>{siteConfig.name}</p>
           <div className="grid gap-1">
             <a href={contactLinks.phone} className="w-fit underline-offset-4 hover:underline">

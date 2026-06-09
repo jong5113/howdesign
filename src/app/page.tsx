@@ -10,12 +10,12 @@ export default async function HomePage() {
   const featuredPortfolios = await getFeaturedPortfolios();
 
   return (
-    <div className="px-4 pb-14 pt-14 sm:px-6 lg:px-8">
+    <div className="px-5 pb-16 pt-24 sm:px-10 lg:px-12">
       <div className="mx-auto max-w-[1760px]">
-        <div className="mb-4 flex items-center justify-between text-[10px] uppercase tracking-wide text-muted">
-          <p>Works Archive</p>
+        <div className="mb-6 flex items-center justify-between text-[11px] uppercase tracking-[0.09em] text-muted">
+          <p>Works</p>
           <Link href="/portfolio" className="text-foreground underline-offset-4 hover:underline">
-            View All
+            Portfolio
           </Link>
         </div>
         <PortfolioGrid items={featuredPortfolios} />
