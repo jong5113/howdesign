@@ -6,7 +6,7 @@ type PortfolioDisplayItem = {
   area?: string;
   scope?: string;
   duration?: string;
-  year?: number;
+  year?: string | number;
   description?: string;
 };
 

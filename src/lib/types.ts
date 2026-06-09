@@ -10,7 +10,7 @@ export type PortfolioItem = {
   area: string;
   scope: string;
   duration: string;
-  year: number;
+  year: string;
   description: string;
   coverImage: string;
   coverImageUrl?: string;

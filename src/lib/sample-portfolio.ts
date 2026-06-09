@@ -21,7 +21,7 @@ export const samplePortfolios: PortfolioItem[] = [
     area: "60PY",
     scope: "올수리",
     duration: "8주",
-    year: 2025,
+    year: "2025",
     description: "상업공간의 회전 동선과 좌석 밀도를 정리하고, 식당의 분위기가 오래 유지되도록 마감과 조명을 계획한 프로젝트입니다.",
     coverImage:
       "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1600&q=88",
@@ -44,7 +44,7 @@ export const samplePortfolios: PortfolioItem[] = [
     area: "38PY",
     scope: "올수리",
     duration: "6주 소요",
-    year: 2025,
+    year: "2025",
     description: "가족의 생활 패턴에 맞춰 수납, 조명, 주방 동선을 단순하고 오래 쓰기 좋은 구조로 정리한 주거공간입니다.",
     coverImage:
       "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=88",
@@ -67,7 +67,7 @@ export const samplePortfolios: PortfolioItem[] = [
     area: "12PY",
     scope: "카페 라운지 조성",
     duration: "2주 소요",
-    year: 2024,
+    year: "2024",
     description: "짧은 공사기간 안에서 카페 운영 동선과 라운지 체류감을 함께 정리한 상업공간 프로젝트입니다.",
     coverImage:
       "https://images.unsplash.com/photo-1604014237800-1c9102c219da?auto=format&fit=crop&w=1600&q=88",
@@ -90,7 +90,7 @@ export const samplePortfolios: PortfolioItem[] = [
     area: "42PY",
     scope: "전체 리모델링",
     duration: "7주",
-    year: 2024,
+    year: "2024",
     description: "밝은 바탕과 정돈된 선을 중심으로 생활의 흐름이 오래 유지되도록 계획한 주거공간입니다.",
     coverImage:
       "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=88",

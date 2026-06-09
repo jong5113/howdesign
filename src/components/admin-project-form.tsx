@@ -26,6 +26,7 @@ type ProjectFormState = {
   description: string;
   featured: boolean;
   published: boolean;
+  displayOrder: string;
 };
 
 type InsertedProject = {
@@ -51,10 +52,11 @@ const initialFormState: ProjectFormState = {
   area: "",
   scope: "",
   duration: "",
-  year: String(new Date().getFullYear()),
+  year: "",
   description: "",
   featured: false,
   published: true,
+  displayOrder: "100",
 };
 
 function formatSupabaseError(error: SupabaseErrorLike) {
@@ -197,7 +199,7 @@ export function AdminProjectForm() {
     }
 
     if (!form.published) {
-      setMessage("Published가 체크되지 않아 저장 후 공개 페이지에 보이지 않을 수 있습니다.");
+      setMessage("Published가 꺼져 있어 저장 후 공개 페이지에는 보이지 않을 수 있습니다.");
     }
 
     setIsSubmitting(true);
@@ -253,11 +255,12 @@ export function AdminProjectForm() {
           area: form.area.trim() || null,
           scope: form.scope.trim() || null,
           duration: form.duration.trim() || null,
-          year: Number(form.year) || new Date().getFullYear(),
+          year: form.year.trim() || null,
           description: form.description.trim() || null,
           cover_image_url: coverImageUrl,
           featured: form.featured,
           published: form.published,
+          display_order: Number(form.displayOrder) || 100,
         })
         .select("id, slug")
         .single<InsertedProject>();
@@ -327,7 +330,7 @@ export function AdminProjectForm() {
         ) : null}
         {!form.published ? (
           <p className="text-[12px] leading-5 text-muted">
-            Published가 체크되지 않았습니다. 저장은 가능하지만 공개 포트폴리오 페이지에는 보이지 않을 수 있습니다.
+            Published가 꺼져 있습니다. 저장은 가능하지만 공개 포트폴리오 페이지에는 보이지 않을 수 있습니다.
           </p>
         ) : null}
       </div>
@@ -367,13 +370,22 @@ export function AdminProjectForm() {
           </select>
         </label>
         <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">
-          Date of Completion / Year
+          Date of Completion
           <input
             value={form.year}
             onChange={(event) => updateField("year", event.target.value)}
             className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
+            placeholder="예: May. 2026"
+          />
+        </label>
+        <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">
+          Display Order
+          <input
+            value={form.displayOrder}
+            onChange={(event) => updateField("displayOrder", event.target.value)}
+            className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
             inputMode="numeric"
-            placeholder="예: 2026"
+            placeholder="낮은 숫자가 먼저 노출됩니다"
           />
         </label>
         {[
@@ -388,7 +400,10 @@ export function AdminProjectForm() {
             <input
               value={form[field as keyof Pick<typeof form, "subtitle" | "location" | "area" | "scope" | "duration">]}
               onChange={(event) =>
-                updateField(field as keyof Pick<typeof form, "subtitle" | "location" | "area" | "scope" | "duration">, event.target.value)
+                updateField(
+                  field as keyof Pick<typeof form, "subtitle" | "location" | "area" | "scope" | "duration">,
+                  event.target.value,
+                )
               }
               className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
               placeholder={placeholder}

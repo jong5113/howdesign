@@ -18,8 +18,10 @@ type ProjectFormState = {
   duration: string;
   year: string;
   description: string;
+  coverImageUrl: string;
   featured: boolean;
   published: boolean;
+  displayOrder: string;
 };
 
 type ProjectRow = {
@@ -32,11 +34,12 @@ type ProjectRow = {
   area: string | null;
   scope: string | null;
   duration: string | null;
-  year: number | null;
+  year: string | number | null;
   description: string | null;
   cover_image_url: string | null;
   featured: boolean | null;
   published: boolean | null;
+  display_order: number | null;
 };
 
 type ImageRow = {
@@ -76,6 +79,8 @@ type AdminProjectEditFormProps = {
   projectId: string;
 };
 
+const manualCoverId = "__manual-cover-url__";
+
 const emptyForm: ProjectFormState = {
   title: "",
   slug: "",
@@ -85,10 +90,12 @@ const emptyForm: ProjectFormState = {
   area: "",
   scope: "",
   duration: "",
-  year: String(new Date().getFullYear()),
+  year: "",
   description: "",
+  coverImageUrl: "",
   featured: false,
   published: true,
+  displayOrder: "100",
 };
 
 function formatSupabaseError(error: SupabaseErrorLike) {
@@ -102,15 +109,27 @@ function formatSupabaseError(error: SupabaseErrorLike) {
     .join(" / ");
 }
 
+function isDuplicateSlugError(error: SupabaseErrorLike) {
+  const errorText = formatSupabaseError(error).toLowerCase();
+  return error.code === "23505" || errorText.includes("duplicate") || errorText.includes("unique");
+}
+
 function getImageUrl(image: ManagedImage) {
   return image.kind === "existing" ? image.imageUrl : image.previewUrl;
+}
+
+function getStoragePaths(images: ImageRow[]) {
+  return images
+    .map((image) => (image.image_url ? getStoragePathFromPublicUrl(image.image_url) : null))
+    .filter((path): path is string => Boolean(path))
+    .filter((path, index, paths) => paths.indexOf(path) === index);
 }
 
 export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
   const [form, setForm] = useState<ProjectFormState>(emptyForm);
   const [images, setImages] = useState<ManagedImage[]>([]);
   const [deletedImages, setDeletedImages] = useState<ImageRow[]>([]);
-  const [coverImageId, setCoverImageId] = useState("");
+  const [coverImageId, setCoverImageId] = useState(manualCoverId);
   const [savedSlug, setSavedSlug] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -119,8 +138,8 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
   const [errorMessage, setErrorMessage] = useState("");
 
   const canSave = useMemo(
-    () => Boolean(form.title.trim() && form.slug.trim() && images.length > 0 && hasSupabaseConfig),
-    [form.slug, form.title, images.length],
+    () => Boolean(form.title.trim() && form.slug.trim() && (images.length > 0 || form.coverImageUrl.trim()) && hasSupabaseConfig),
+    [form.coverImageUrl, form.slug, form.title, images.length],
   );
 
   useEffect(() => {
@@ -134,7 +153,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
       const { data: project, error: projectError } = await supabaseClient
         .from("portfolio_projects")
         .select(
-          "id, title, slug, category, subtitle, location, area, scope, duration, year, description, cover_image_url, featured, published",
+          "id, title, slug, category, subtitle, location, area, scope, duration, year, description, cover_image_url, featured, published, display_order",
         )
         .eq("id", projectId)
         .maybeSingle<ProjectRow>();
@@ -167,6 +186,8 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
           imageUrl: image.image_url || "",
           alt: image.alt || project.title || "",
         }));
+      const coverImageUrl = project.cover_image_url || "";
+      const coverImage = nextImages.find((image) => image.imageUrl === coverImageUrl);
 
       setForm({
         title: project.title || "",
@@ -177,15 +198,15 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
         area: project.area || "",
         scope: project.scope || "",
         duration: project.duration || "",
-        year: String(project.year || new Date().getFullYear()),
+        year: project.year ? String(project.year) : "",
         description: project.description || "",
+        coverImageUrl,
         featured: Boolean(project.featured),
         published: Boolean(project.published),
+        displayOrder: String(project.display_order ?? 100),
       });
       setImages(nextImages);
-      setCoverImageId(
-        nextImages.find((image) => image.imageUrl === project.cover_image_url)?.id || nextImages[0]?.id || "",
-      );
+      setCoverImageId(coverImage?.id || manualCoverId);
       setSavedSlug(project.slug || "");
       setIsLoading(false);
     }
@@ -226,7 +247,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
 
     setImages((current) => {
       const mergedImages = [...current, ...nextImages];
-      if (!coverImageId && mergedImages[0]) {
+      if (coverImageId === manualCoverId && !form.coverImageUrl.trim() && mergedImages[0]) {
         setCoverImageId(mergedImages[0].id);
       }
       return mergedImages;
@@ -282,7 +303,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
       }
 
       if (removedImage?.id === coverImageId) {
-        setCoverImageId(next[0]?.id || "");
+        setCoverImageId(next[0]?.id || manualCoverId);
       }
 
       return next;
@@ -300,7 +321,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
     }
 
     if (!canSave) {
-      setErrorMessage("title, slug, 이미지가 필요합니다.");
+      setErrorMessage("title, slug, cover image 또는 gallery image가 필요합니다.");
       return;
     }
 
@@ -341,11 +362,11 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
         });
       }
 
-      const coverIndex = Math.max(
-        0,
-        images.findIndex((image) => image.id === coverImageId),
-      );
-      const coverImageUrl = savedImages[coverIndex]?.imageUrl || savedImages[0]?.imageUrl;
+      const coverIndex = images.findIndex((image) => image.id === coverImageId);
+      const coverImageUrl =
+        coverImageId === manualCoverId
+          ? form.coverImageUrl.trim()
+          : savedImages[coverIndex]?.imageUrl || savedImages[0]?.imageUrl || form.coverImageUrl.trim();
 
       setMessage("Updating project...");
       const { error: projectError } = await client
@@ -359,58 +380,62 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
           area: form.area.trim() || null,
           scope: form.scope.trim() || null,
           duration: form.duration.trim() || null,
-          year: Number(form.year) || new Date().getFullYear(),
+          year: form.year.trim() || null,
           description: form.description.trim() || null,
-          cover_image_url: coverImageUrl,
+          cover_image_url: coverImageUrl || null,
           featured: form.featured,
           published: form.published,
+          display_order: Number(form.displayOrder) || 100,
         })
         .eq("id", projectId);
 
       if (projectError) {
         console.error("[Admin edit] Project update failed.", projectError);
+
+        if (isDuplicateSlugError(projectError)) {
+          throw new Error("이미 사용 중인 slug입니다.");
+        }
+
         throw new Error(`프로젝트 수정 실패: ${formatSupabaseError(projectError)}`);
       }
 
-      setMessage("Saving image order...");
-      const { error: deleteImagesError } = await client
-        .from("portfolio_images")
-        .delete()
-        .eq("project_id", projectId);
+      setMessage("Saving gallery images...");
+      const { error: deleteImagesError } = await client.from("portfolio_images").delete().eq("project_id", projectId);
 
       if (deleteImagesError) {
         console.error("[Admin edit] Image reset failed.", deleteImagesError);
         throw new Error(`기존 이미지 정리 실패: ${formatSupabaseError(deleteImagesError)}`);
       }
 
-      const { error: insertImagesError } = await client.from("portfolio_images").insert(
-        savedImages.map((image, index) => ({
-          project_id: projectId,
-          image_url: image.imageUrl,
-          alt: image.alt || form.title.trim(),
-          display_order: index + 1,
-        })),
-      );
+      if (savedImages.length > 0) {
+        const { error: insertImagesError } = await client.from("portfolio_images").insert(
+          savedImages.map((image, index) => ({
+            project_id: projectId,
+            image_url: image.imageUrl,
+            alt: image.alt || form.title.trim(),
+            display_order: index + 1,
+          })),
+        );
 
-      if (insertImagesError) {
-        console.error("[Admin edit] Image insert failed.", insertImagesError);
-        throw new Error(`이미지 저장 실패: ${formatSupabaseError(insertImagesError)}`);
+        if (insertImagesError) {
+          console.error("[Admin edit] Image insert failed.", insertImagesError);
+          throw new Error(`이미지 저장 실패: ${formatSupabaseError(insertImagesError)}`);
+        }
       }
 
-      const storagePaths = deletedImages
-        .map((image) => (image.image_url ? getStoragePathFromPublicUrl(image.image_url) : null))
-        .filter((path): path is string => Boolean(path));
+      const storagePaths = getStoragePaths(deletedImages);
 
       if (storagePaths.length > 0) {
         const { error: storageDeleteError } = await client.storage.from("portfolio").remove(storagePaths);
 
         if (storageDeleteError) {
           console.error("[Admin edit] Removed image storage cleanup failed.", storageDeleteError);
-          setMessage(`저장 완료. 단, 삭제한 Storage 이미지 정리에 실패했습니다: ${storageDeleteError.message}`);
+          setMessage(`저장은 완료됐지만 Storage 이미지 정리에 실패했습니다: ${storageDeleteError.message}`);
         }
       }
 
       setDeletedImages([]);
+      setForm((current) => ({ ...current, slug, coverImageUrl: coverImageUrl || "" }));
       setSavedSlug(slug);
       setMessage("Complete. 프로젝트가 수정되었습니다.");
     } catch (error) {
@@ -468,13 +493,22 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
           </select>
         </label>
         <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">
-          Date of Completion / Year
+          Date of Completion
           <input
             value={form.year}
             onChange={(event) => updateField("year", event.target.value)}
             className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
+            placeholder="예: May. 2026"
+          />
+        </label>
+        <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">
+          Display Order
+          <input
+            value={form.displayOrder}
+            onChange={(event) => updateField("displayOrder", event.target.value)}
+            className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
             inputMode="numeric"
-            placeholder="예: 2026"
+            placeholder="낮은 숫자가 먼저 노출됩니다"
           />
         </label>
         {[
@@ -489,7 +523,10 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
             <input
               value={form[field as keyof Pick<typeof form, "subtitle" | "location" | "area" | "scope" | "duration">]}
               onChange={(event) =>
-                updateField(field as keyof Pick<typeof form, "subtitle" | "location" | "area" | "scope" | "duration">, event.target.value)
+                updateField(
+                  field as keyof Pick<typeof form, "subtitle" | "location" | "area" | "scope" | "duration">,
+                  event.target.value,
+                )
               }
               className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
               placeholder={placeholder}
@@ -525,7 +562,33 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
         </label>
       </div>
 
-      <section className="grid gap-4">
+      <section className="grid gap-5">
+        <div className="grid gap-3">
+          <p className="text-[12px] uppercase tracking-[0.08em]">Cover Image</p>
+          {form.coverImageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={form.coverImageUrl} alt="" className="aspect-[3/2] w-full max-w-sm object-cover" />
+          ) : null}
+          <label className="flex items-center gap-2 text-[12px] uppercase tracking-[0.08em]">
+            <input
+              type="radio"
+              name="coverImage"
+              checked={coverImageId === manualCoverId}
+              onChange={() => setCoverImageId(manualCoverId)}
+            />
+            Use cover image URL
+          </label>
+          <input
+            value={form.coverImageUrl}
+            onChange={(event) => {
+              updateField("coverImageUrl", event.target.value);
+              setCoverImageId(manualCoverId);
+            }}
+            className="border-b border-line bg-transparent py-2 text-[13px] outline-none"
+            placeholder="cover_image_url"
+          />
+        </div>
+
         <label
           onDrop={handleDrop}
           onDragOver={(event) => {
@@ -547,6 +610,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={getImageUrl(image)} alt="" className="aspect-[3/2] w-full object-cover" />
               <figcaption className="grid gap-2 text-[11px] uppercase tracking-[0.08em] text-muted">
+                <p>Display Order: {index + 1}</p>
                 <label className="flex items-center gap-2 text-foreground">
                   <input
                     type="radio"
@@ -554,7 +618,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
                     checked={coverImageId === image.id}
                     onChange={() => setCoverImageId(image.id)}
                   />
-                  대표 이미지
+                  Set as cover image
                 </label>
                 <div className="flex gap-3">
                   <button type="button" onClick={() => moveImage(index, "up")} disabled={index === 0}>

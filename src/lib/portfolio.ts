@@ -45,7 +45,7 @@ export type PortfolioProjectRow = {
   area: string | null;
   scope: string | null;
   duration: string | null;
-  year: number | null;
+  year: string | number | null;
   description: string | null;
   cover_image_url: string | null;
   featured: boolean | null;
@@ -101,7 +101,7 @@ export function normalizeProject(
     area: normalizeText(project.area),
     scope: normalizeText(project.scope),
     duration: normalizeText(project.duration),
-    year: project.year || new Date().getFullYear(),
+    year: project.year ? String(project.year) : "",
     description: normalizeText(project.description),
     coverImage: coverImageUrl || fallbackCoverImage,
     coverImageUrl,
