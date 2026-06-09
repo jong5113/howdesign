@@ -118,6 +118,19 @@ using year::text;
 - 업로드 경로는 `{slug}/filename.jpg` 구조입니다.
 - 예: `daedong-eel-yeouido/01-cover.jpg`
 - `cover_image_url`과 `portfolio_images.image_url`에는 Supabase Storage Public URL이 저장됩니다.
+- 한글, 공백, 괄호가 포함된 원본 파일명은 그대로 쓰지 않고 안전한 영문 파일명으로 자동 변환됩니다.
+- 실제 업로드 파일명은 `image-001-타임스탬프-랜덤값.jpg`처럼 생성되어 중복 충돌을 줄입니다.
+
+Storage 업로드 실패 시 아래를 확인합니다.
+
+- Supabase Storage bucket 이름이 `portfolio`인지 확인
+- Storage policy에서 `storage.objects` insert/update/delete가 허용되는지 확인
+- `portfolio_projects`, `portfolio_images` RLS 정책에서 insert/update/delete가 허용되는지 확인
+- 이미지 파일 크기가 Supabase/Vercel 제한을 넘지 않는지 확인
+- 파일 타입이 이미지인지 확인
+- Vercel 환경변수 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `ADMIN_PASSWORD`가 설정됐는지 확인
+
+관리자 업로드 화면은 실패 시 bucket, upload path, file name, file type, file size, slug, error message/statusCode/details/hint를 console과 화면 메시지에 표시합니다.
 
 ## 관리자 페이지 사용법
 
@@ -323,6 +336,24 @@ ADMIN_PASSWORD=your_admin_password
 - 이미지 삭제
 - 이미지 순서 `Up` / `Down` 변경
 - 저장 후 `View Project`로 공개 상세페이지 확인
+
+### slug 입력 규칙
+
+`slug`는 공개 상세페이지 주소와 Supabase Storage 폴더명에 함께 사용됩니다. 한글 제목을 쓰더라도 `slug`는 영어로 직접 입력하는 것을 권장합니다.
+
+좋은 예:
+
+- `sorakjae-stay`
+- `daedong-eel-yeouido`
+- `gangnam-office-2026`
+
+나쁜 예:
+
+- `소락재-스테이`
+- `강남 오피스`
+- `test/project`
+
+관리자 화면은 slug를 저장하기 전에 영어 소문자, 숫자, 하이픈 기반의 안전한 값으로 정리합니다. 한글이나 특수문자만 입력되어 안전한 값이 만들어지지 않으면 `project-타임스탬프` 형태의 fallback slug를 사용합니다. Storage upload path에는 한글, 공백, 괄호, 슬래시 같은 위험 문자가 들어가지 않도록 검사합니다.
 
 프로젝트 삭제 시 `portfolio_projects` row를 삭제합니다. `portfolio_images`는 `on delete cascade`로 함께 삭제됩니다. 가능한 경우 Supabase Storage의 파일도 같이 삭제합니다. Storage 삭제가 실패하면 화면에 오류가 표시되며, Supabase Storage에서 수동 정리할 수 있습니다.
 

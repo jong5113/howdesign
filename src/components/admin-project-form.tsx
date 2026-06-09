@@ -3,7 +3,14 @@
 import { ChangeEvent, DragEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-import { createFilePath, createSlug } from "@/lib/admin-project-utils";
+import {
+  createFilePath,
+  createSafeStorageFolder,
+  createSlug,
+  formatStorageError,
+  isSafeStoragePath,
+  PORTFOLIO_BUCKET,
+} from "@/lib/admin-project-utils";
 import { hasSupabaseConfig, supabaseClient } from "@/lib/supabase/client";
 import type { PortfolioCategory } from "@/lib/types";
 
@@ -73,6 +80,23 @@ function formatSupabaseError(error: SupabaseErrorLike) {
 function isDuplicateSlugError(error: SupabaseErrorLike) {
   const errorText = formatSupabaseError(error).toLowerCase();
   return error.code === "23505" || errorText.includes("duplicate") || errorText.includes("unique");
+}
+
+async function cleanupUploadedImages(paths: string[]) {
+  if (!supabaseClient || paths.length === 0) {
+    return;
+  }
+
+  const { error } = await supabaseClient.storage.from(PORTFOLIO_BUCKET).remove(paths);
+
+  if (error) {
+    console.error("[Admin upload] Uploaded file cleanup failed.", {
+      bucket: PORTFOLIO_BUCKET,
+      paths,
+      errorDetails: formatStorageError(error),
+      rawError: error,
+    });
+  }
 }
 
 export function AdminProjectForm() {
@@ -206,33 +230,58 @@ export function AdminProjectForm() {
 
     try {
       const slug = createSlug(form.slug);
+      const storageFolder = createSafeStorageFolder(slug, form.title);
+      const uploadedPaths: string[] = [];
       setSubmitStatus("uploading");
       setMessage("Uploading images...");
 
       const uploadedImages = [];
 
       for (const [index, image] of images.entries()) {
-        const path = createFilePath(slug, image.file, index);
+        const path = createFilePath(storageFolder, image.file, index);
+        if (!isSafeStoragePath(path)) {
+          throw new Error("Storage 경로에 사용할 수 없는 문자가 있습니다. slug를 영어 소문자와 하이픈으로 수정해주세요.");
+        }
+        const uploadLog = {
+          bucket: PORTFOLIO_BUCKET,
+          path,
+          fileName: image.file.name,
+          fileType: image.file.type,
+          fileSize: image.file.size,
+          slug,
+          storageFolder,
+          step: "uploading image",
+        };
+        console.log("[Admin upload] Uploading image.", uploadLog);
+        setMessage(`Uploading to ${PORTFOLIO_BUCKET}/${path}`);
         const { data: uploadData, error: uploadError } = await client.storage
-          .from("portfolio")
+          .from(PORTFOLIO_BUCKET)
           .upload(path, image.file, {
             cacheControl: "3600",
             upsert: false,
           });
 
         if (uploadError) {
-          const formattedError = formatSupabaseError(uploadError);
+          const formattedError = formatStorageError(uploadError);
           console.error("[Admin upload] Storage upload failed.", {
-            bucket: "portfolio",
-            path,
-            error: uploadError,
+            ...uploadLog,
+            errorDetails: formattedError,
+            rawError: uploadError,
           });
-          throw new Error(
-            `Storage 업로드 실패: ${formattedError}. Supabase Storage bucket 또는 policy를 확인하세요.`,
-          );
+          await cleanupUploadedImages(uploadedPaths);
+          throw new Error(`Storage 업로드 실패로 프로젝트 저장을 중단했습니다. ${formattedError}`);
         }
 
-        const { data: publicUrlData } = client.storage.from("portfolio").getPublicUrl(uploadData.path);
+        uploadedPaths.push(uploadData.path);
+        console.log("[Admin upload] Upload complete.", {
+          bucket: PORTFOLIO_BUCKET,
+          path: uploadData.path,
+          slug,
+          storageFolder,
+          step: "upload complete",
+        });
+
+        const { data: publicUrlData } = client.storage.from(PORTFOLIO_BUCKET).getPublicUrl(uploadData.path);
 
         uploadedImages.push({
           imageUrl: publicUrlData.publicUrl,
@@ -267,6 +316,7 @@ export function AdminProjectForm() {
 
       if (projectError || !project) {
         console.error("[Admin upload] portfolio_projects insert failed.", projectError);
+        await cleanupUploadedImages(uploadedPaths);
 
         if (projectError && isDuplicateSlugError(projectError)) {
           throw new Error("이미 사용 중인 slug입니다. slug를 바꿔주세요.");
@@ -293,6 +343,8 @@ export function AdminProjectForm() {
 
       if (imagesError) {
         console.error("[Admin upload] portfolio_images insert failed.", imagesError);
+        await client.from("portfolio_projects").delete().eq("id", project.id);
+        await cleanupUploadedImages(uploadedPaths);
         throw new Error(`portfolio_images 저장 실패: ${formatSupabaseError(imagesError)}`);
       }
 
@@ -357,6 +409,9 @@ export function AdminProjectForm() {
             className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
             required
           />
+          <span className="text-[11px] normal-case tracking-normal text-muted">
+            slug는 영어 소문자, 숫자, 하이픈만 사용하는 것을 권장합니다. 예: sorakjae-stay
+          </span>
         </label>
         <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">
           Category

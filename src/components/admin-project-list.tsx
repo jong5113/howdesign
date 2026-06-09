@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-import { getStoragePathFromPublicUrl } from "@/lib/admin-project-utils";
+import { getStoragePathFromPublicUrl, PORTFOLIO_BUCKET } from "@/lib/admin-project-utils";
 import { hasSupabaseConfig, supabaseClient } from "@/lib/supabase/client";
 import type { PortfolioCategory } from "@/lib/types";
 
@@ -137,7 +137,7 @@ export function AdminProjectList({ initialProjects, initialError = "" }: AdminPr
     const storagePaths = getProjectStoragePaths(project, (images || []) as ProjectImage[]);
 
     if (storagePaths.length > 0) {
-      const { error: storageError } = await supabaseClient.storage.from("portfolio").remove(storagePaths);
+      const { error: storageError } = await supabaseClient.storage.from(PORTFOLIO_BUCKET).remove(storagePaths);
 
       if (storageError) {
         console.error("[Admin projects] Storage image delete failed.", storageError);

@@ -3,7 +3,15 @@
 import { ChangeEvent, DragEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-import { createFilePath, createSlug, getStoragePathFromPublicUrl } from "@/lib/admin-project-utils";
+import {
+  createFilePath,
+  createSafeStorageFolder,
+  createSlug,
+  formatStorageError,
+  getStoragePathFromPublicUrl,
+  isSafeStoragePath,
+  PORTFOLIO_BUCKET,
+} from "@/lib/admin-project-utils";
 import { hasSupabaseConfig, supabaseClient } from "@/lib/supabase/client";
 import type { PortfolioCategory } from "@/lib/types";
 
@@ -123,6 +131,23 @@ function getStoragePaths(images: ImageRow[]) {
     .map((image) => (image.image_url ? getStoragePathFromPublicUrl(image.image_url) : null))
     .filter((path): path is string => Boolean(path))
     .filter((path, index, paths) => paths.indexOf(path) === index);
+}
+
+async function cleanupUploadedImages(paths: string[]) {
+  if (!supabaseClient || paths.length === 0) {
+    return;
+  }
+
+  const { error } = await supabaseClient.storage.from(PORTFOLIO_BUCKET).remove(paths);
+
+  if (error) {
+    console.error("[Admin edit] Uploaded file cleanup failed.", {
+      bucket: PORTFOLIO_BUCKET,
+      paths,
+      errorDetails: formatStorageError(error),
+      rawError: error,
+    });
+  }
 }
 
 export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
@@ -321,11 +346,13 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
 
     const client = supabaseClient;
     const slug = createSlug(form.slug);
+    const storageFolder = createSafeStorageFolder(slug, form.title);
     setIsSaving(true);
 
     try {
       setMessage("Uploading new images...");
       const savedImages: SavedImage[] = [];
+      const uploadedPaths: string[] = [];
 
       for (const [index, image] of images.entries()) {
         if (image.kind === "existing") {
@@ -336,20 +363,50 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
           continue;
         }
 
-        const path = createFilePath(slug, image.file, index);
+        const path = createFilePath(storageFolder, image.file, index);
+        if (!isSafeStoragePath(path)) {
+          throw new Error("Storage 경로에 사용할 수 없는 문자가 있습니다. slug를 영어 소문자와 하이픈으로 수정해주세요.");
+        }
+        const uploadLog = {
+          bucket: PORTFOLIO_BUCKET,
+          path,
+          fileName: image.file.name,
+          fileType: image.file.type,
+          fileSize: image.file.size,
+          slug,
+          storageFolder,
+          step: "uploading image",
+        };
+        console.log("[Admin edit] Uploading image.", uploadLog);
+        setMessage(`Uploading to ${PORTFOLIO_BUCKET}/${path}`);
         const { data: uploadData, error: uploadError } = await client.storage
-          .from("portfolio")
+          .from(PORTFOLIO_BUCKET)
           .upload(path, image.file, {
             cacheControl: "3600",
             upsert: false,
           });
 
         if (uploadError) {
-          console.error("[Admin edit] Storage upload failed.", uploadError);
-          throw new Error(`Storage 업로드 실패: ${formatSupabaseError(uploadError)}`);
+          const formattedError = formatStorageError(uploadError);
+          console.error("[Admin edit] Storage upload failed.", {
+            ...uploadLog,
+            errorDetails: formattedError,
+            rawError: uploadError,
+          });
+          await cleanupUploadedImages(uploadedPaths);
+          throw new Error(`Storage 업로드 실패로 프로젝트 저장을 중단했습니다. ${formattedError}`);
         }
 
-        const { data: publicUrlData } = client.storage.from("portfolio").getPublicUrl(uploadData.path);
+        uploadedPaths.push(uploadData.path);
+        console.log("[Admin edit] Upload complete.", {
+          bucket: PORTFOLIO_BUCKET,
+          path: uploadData.path,
+          slug,
+          storageFolder,
+          step: "upload complete",
+        });
+
+        const { data: publicUrlData } = client.storage.from(PORTFOLIO_BUCKET).getPublicUrl(uploadData.path);
         savedImages.push({
           imageUrl: publicUrlData.publicUrl,
           alt: form.title.trim(),
@@ -385,6 +442,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
 
       if (projectError) {
         console.error("[Admin edit] Project update failed.", projectError);
+        await cleanupUploadedImages(uploadedPaths);
 
         if (isDuplicateSlugError(projectError)) {
           throw new Error("이미 사용 중인 slug입니다. slug를 바꿔주세요.");
@@ -413,6 +471,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
 
         if (insertImagesError) {
           console.error("[Admin edit] Image insert failed.", insertImagesError);
+          await cleanupUploadedImages(uploadedPaths);
           throw new Error(`이미지 저장 실패: ${formatSupabaseError(insertImagesError)}`);
         }
       }
@@ -420,7 +479,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
       const storagePaths = getStoragePaths(deletedImages);
 
       if (storagePaths.length > 0) {
-        const { error: storageDeleteError } = await client.storage.from("portfolio").remove(storagePaths);
+        const { error: storageDeleteError } = await client.storage.from(PORTFOLIO_BUCKET).remove(storagePaths);
 
         if (storageDeleteError) {
           console.error("[Admin edit] Removed image storage cleanup failed.", storageDeleteError);
@@ -474,6 +533,9 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
             className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
             required
           />
+          <span className="text-[11px] normal-case tracking-normal text-muted">
+            영어 소문자, 숫자, 하이픈만 권장합니다. 변경하면 공개 상세페이지 주소도 함께 바뀝니다.
+          </span>
         </label>
         <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">
           Category
