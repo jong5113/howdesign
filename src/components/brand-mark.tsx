@@ -8,6 +8,7 @@ type BrandMarkProps = {
   textClassName?: string;
   priority?: boolean;
   variant?: "header" | "footer";
+  placement?: "header" | "footer" | "default";
   fallbackText?: string;
 };
 
