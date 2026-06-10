@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import Link from "next/link";
 
 import { AdminLoginForm } from "@/components/admin-login-form";
 import { AdminNav } from "@/components/admin-nav";
@@ -32,7 +33,16 @@ export default async function NewProjectPage() {
           {isAuthed ? <AdminNav /> : null}
         </header>
 
-        {isAuthed ? <AdminProjectForm /> : <AdminLoginForm />}
+        {isAuthed ? (
+          <div className="grid gap-8">
+            <Link href="/admin/projects" className="w-fit text-[12px] uppercase tracking-[0.09em] underline">
+              ← Back to Admin
+            </Link>
+            <AdminProjectForm />
+          </div>
+        ) : (
+          <AdminLoginForm />
+        )}
       </main>
     </div>
   );

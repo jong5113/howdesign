@@ -38,7 +38,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
             </p>
             {isAuthed ? (
               <Link href="/admin/projects" className="w-fit text-[12px] uppercase tracking-[0.09em] underline">
-                Back to Projects
+                ← Back to Admin
               </Link>
             ) : null}
           </div>

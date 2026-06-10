@@ -706,9 +706,14 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
           {isSaving ? "Saving..." : "Save Changes"}
         </button>
         {savedSlug ? (
-          <Link href={`/portfolio/${savedSlug}`} className="text-[12px] uppercase tracking-[0.08em] underline">
-            View Project
-          </Link>
+          <>
+            <Link href={`/portfolio/${savedSlug}`} className="text-[12px] uppercase tracking-[0.08em] underline">
+              View Project
+            </Link>
+            <Link href="/admin/projects" className="text-[12px] uppercase tracking-[0.08em] underline">
+              Back to Admin
+            </Link>
+          </>
         ) : null}
       </div>
     </form>

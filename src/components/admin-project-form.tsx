@@ -350,7 +350,7 @@ export function AdminProjectForm() {
 
       setSubmitStatus("complete");
       setSavedSlug(project.slug);
-      setMessage("Complete. 프로젝트가 저장되었습니다.");
+      setMessage("Project saved successfully.");
     } catch (error) {
       setSubmitStatus("error");
       const nextError = error instanceof Error ? error.message : "저장 중 알 수 없는 오류가 발생했습니다.";
@@ -557,9 +557,17 @@ export function AdminProjectForm() {
           {isSubmitting ? "Saving..." : "Save Project"}
         </button>
         {savedSlug && submitStatus === "complete" ? (
-          <Link href={`/portfolio/${savedSlug}`} className="text-[12px] uppercase tracking-[0.08em] underline">
-            View Project
-          </Link>
+          <>
+            <Link href={`/portfolio/${savedSlug}`} className="text-[12px] uppercase tracking-[0.08em] underline">
+              View Project
+            </Link>
+            <Link href="/admin/projects" className="text-[12px] uppercase tracking-[0.08em] underline">
+              Back to Admin
+            </Link>
+            <a href="/admin/projects/new" className="text-[12px] uppercase tracking-[0.08em] underline">
+              Add Another Project
+            </a>
+          </>
         ) : null}
       </div>
     </form>
