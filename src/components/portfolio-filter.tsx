@@ -1,31 +1,57 @@
 import Link from "next/link";
 
-import type { PortfolioCategory } from "@/lib/types";
-
-type PortfolioFilterValue = "all" | PortfolioCategory;
-
 type PortfolioFilterProps = {
-  active: PortfolioFilterValue;
+  activeCategory?: "all" | "residential" | "commercial";
+  active?: "all" | "residential" | "commercial";
+  showFilters?: boolean;
+  title?: string;
+  className?: string;
 };
 
-const filters: Array<{ href: string; label: string; value: PortfolioFilterValue }> = [
-  { href: "/portfolio", label: "All", value: "all" },
-  { href: "/portfolio/residential", label: "Residential", value: "residential" },
-  { href: "/portfolio/commercial", label: "Commercial", value: "commercial" },
-];
+const filters = [
+  {
+    label: "ALL",
+    href: "/portfolio",
+    value: "all",
+  },
+  {
+    label: "RESIDENTIAL",
+    href: "/portfolio/residential",
+    value: "residential",
+  },
+  {
+    label: "COMMERCIAL",
+    href: "/portfolio/commercial",
+    value: "commercial",
+  },
+] as const;
 
-export function PortfolioFilter({ active }: PortfolioFilterProps) {
+export function PortfolioFilter({
+  activeCategory,
+  active,
+  showFilters,
+  title = "WORK",
+  className = "",
+}: PortfolioFilterProps) {
+  const current = active || activeCategory || "all";
+  const shouldShowFilters = showFilters ?? Boolean(active || activeCategory);
+
   return (
-    <nav className="mb-6 flex flex-wrap gap-5 text-[11px] uppercase tracking-[0.09em]" aria-label="포트폴리오 필터">
-      {filters.map((filter) => (
-        <Link
-          key={filter.value}
-          href={filter.href}
-          className={filter.value === active ? "text-foreground" : "text-muted"}
-        >
-          {filter.label}
-        </Link>
-      ))}
-    </nav>
+    <div className={`grid gap-3 text-[12px] uppercase tracking-[0.09em] ${className}`}>
+      <p className="text-foreground">{title}</p>
+      {shouldShowFilters ? (
+        <nav className="flex flex-wrap gap-4 text-muted" aria-label="Work categories">
+          {filters.map((filter) => (
+            <Link
+              key={filter.href}
+              href={filter.href}
+              className={filter.value === current ? "text-foreground" : "underline-offset-4 hover:underline"}
+            >
+              {filter.label}
+            </Link>
+          ))}
+        </nav>
+      ) : null}
+    </div>
   );
 }

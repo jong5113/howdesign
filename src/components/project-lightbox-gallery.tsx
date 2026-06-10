@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyboardEvent, MouseEvent, useEffect, useState } from "react";
+import { KeyboardEvent, MouseEvent, useCallback, useEffect, useState } from "react";
 
 type ProjectLightboxImage = {
   src: string;
@@ -22,7 +22,7 @@ export function ProjectLightboxGallery({ images, className = "" }: ProjectLightb
     setActiveIndex(null);
   }
 
-  function showPrevious() {
+  const showPrevious = useCallback(() => {
     setActiveIndex((current) => {
       if (current === null) {
         return current;
@@ -30,9 +30,9 @@ export function ProjectLightboxGallery({ images, className = "" }: ProjectLightb
 
       return current === 0 ? images.length - 1 : current - 1;
     });
-  }
+  }, [images.length]);
 
-  function showNext() {
+  const showNext = useCallback(() => {
     setActiveIndex((current) => {
       if (current === null) {
         return current;
@@ -40,7 +40,7 @@ export function ProjectLightboxGallery({ images, className = "" }: ProjectLightb
 
       return current === images.length - 1 ? 0 : current + 1;
     });
-  }
+  }, [images.length]);
 
   function stopClick(event: MouseEvent) {
     event.stopPropagation();
@@ -81,9 +81,9 @@ export function ProjectLightboxGallery({ images, className = "" }: ProjectLightb
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [hasMultipleImages, isOpen, images.length]);
+  }, [hasMultipleImages, isOpen, images.length, showNext, showPrevious]);
 
-  function renderImageButton(image: ProjectLightboxImage, index: number, imageClassName = "h-auto w-full") {
+  function renderImageButton(image: ProjectLightboxImage, index: number, imageClassName = "block h-auto w-full") {
     return (
       <button
         type="button"

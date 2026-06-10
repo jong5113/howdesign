@@ -38,7 +38,7 @@ export default async function PortfolioDetailPage({ params }: PortfolioDetailPag
     .filter((image, index, images) => images.indexOf(image) === index);
 
   return (
-    <div className="px-5 pb-16 pt-36 sm:px-6 sm:pt-44 lg:px-6">
+    <div className="px-5 pb-16 pt-44 sm:px-6 sm:pt-52 lg:px-6 lg:pt-56">
       <article className="mx-auto grid max-w-[1760px] gap-10 lg:grid-cols-[280px_1fr] lg:gap-12 xl:grid-cols-[320px_1fr]">
         <aside className="grid content-start gap-12 text-[12px] leading-6 text-muted lg:sticky lg:top-44 lg:self-start">
           <nav className="grid gap-1.5 text-[11px] uppercase tracking-[0.1em]" aria-label="상세 페이지 메뉴">
