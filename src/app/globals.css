@@ -46,3 +46,14 @@ textarea {
   background: #111111;
   color: #ffffff;
 }
+@media (min-width: 1024px) {
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .xl\:grid-cols-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}

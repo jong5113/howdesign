@@ -11,7 +11,7 @@ function logStep(message) {
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
     stdio: "inherit",
-    shell: process.platform === "win32",
+    shell: false,
     ...options,
   });
 
@@ -24,7 +24,7 @@ function run(command, args, options = {}) {
 function runCapture(command, args) {
   const result = spawnSync(command, args, {
     encoding: "utf8",
-    shell: process.platform === "win32",
+    shell: false,
   });
 
   if (result.status !== 0) {
