@@ -83,21 +83,27 @@ export function ProjectLightboxGallery({ images, className = "" }: ProjectLightb
     };
   }, [hasMultipleImages, isOpen, images.length]);
 
+  function renderImageButton(image: ProjectLightboxImage, index: number, imageClassName = "h-auto w-full") {
+    return (
+      <button
+        type="button"
+        onClick={() => setActiveIndex(index)}
+        onKeyDown={(event) => handleThumbnailKeyDown(event, index)}
+        className="block w-full cursor-pointer bg-transparent p-0 text-left"
+        aria-label={`${image.alt || "Project image"} 크게 보기`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={image.src} alt={image.alt || ""} className={imageClassName} />
+      </button>
+    );
+  }
+
   return (
     <>
       <section className={className} aria-label="프로젝트 이미지 갤러리">
         {images.map((image, index) => (
           <figure key={`${image.src}-${index}`} className="mb-1.5 break-inside-avoid">
-            <button
-              type="button"
-              onClick={() => setActiveIndex(index)}
-              onKeyDown={(event) => handleThumbnailKeyDown(event, index)}
-              className="block w-full cursor-pointer bg-transparent p-0 text-left"
-              aria-label={`${image.alt || "Project image"} 크게 보기`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={image.src} alt={image.alt || ""} className="h-auto w-full" />
-            </button>
+            {renderImageButton(image, index)}
           </figure>
         ))}
       </section>

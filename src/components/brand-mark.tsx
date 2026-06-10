@@ -1,50 +1,56 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
-
+import fs from "node:fs";
+import path from "node:path";
 import Image from "next/image";
-import Link from "next/link";
-
-import { siteConfig } from "@/lib/site";
 
 type BrandMarkProps = {
-  placement: "header" | "footer";
+  className?: string;
+  imageClassName?: string;
+  textClassName?: string;
+  priority?: boolean;
+  variant?: "header" | "footer";
+  fallbackText?: string;
 };
 
-function getLogoPath() {
-  const publicPath = join(process.cwd(), "public");
+function getLogoSrc() {
+  const logoSvgPath = path.join(process.cwd(), "public", "logo.svg");
+  const logoPngPath = path.join(process.cwd(), "public", "logo.png");
 
-  if (existsSync(join(publicPath, "logo.svg"))) {
+  if (fs.existsSync(logoSvgPath)) {
     return "/logo.svg";
   }
 
-  if (existsSync(join(publicPath, "logo.png"))) {
+  if (fs.existsSync(logoPngPath)) {
     return "/logo.png";
   }
 
   return null;
 }
 
-export function BrandMark({ placement }: BrandMarkProps) {
-  const logoPath = getLogoPath();
-  const logoClassName =
-    placement === "header"
-      ? "h-auto w-[156px] object-contain sm:w-[224px]"
-      : "h-auto w-[76px] object-contain";
+export function BrandMark({
+  className = "",
+  imageClassName = "h-auto w-[180px] object-contain sm:w-[240px]",
+  textClassName = "text-[18px] font-normal tracking-[0.08em] sm:text-[22px]",
+  priority = false,
+  fallbackText = "주식회사 하우디자인",
+}: BrandMarkProps) {
+  const logoSrc = getLogoSrc();
 
   return (
-    <Link href="/" className="inline-flex items-center justify-center">
-      {logoPath ? (
+    <div className={className}>
+      {logoSrc ? (
         <Image
-          src={logoPath}
-          alt={siteConfig.name}
-          width={355}
-          height={204}
-          className={logoClassName}
-          priority={placement === "header"}
+          src={logoSrc}
+          alt="주식회사 하우디자인"
+          width={320}
+          height={120}
+          priority={priority}
+          className={imageClassName}
         />
       ) : (
-        <span className="text-center text-[16px] font-normal tracking-tight sm:text-[18px]">{siteConfig.name}</span>
+        <span className={textClassName}>{fallbackText}</span>
       )}
-    </Link>
+    </div>
   );
 }
+
+export default BrandMark;
