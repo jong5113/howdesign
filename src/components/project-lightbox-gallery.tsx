@@ -124,10 +124,10 @@ export function ProjectLightboxGallery({ images, className = "" }: ProjectLightb
               <button
                 type="button"
                 onClick={closeLightbox}
-                className="px-2 py-2 text-foreground underline-offset-4 hover:underline"
+                className="flex h-12 w-12 items-center justify-center text-[32px] font-light leading-none text-foreground transition-opacity hover:opacity-55 sm:h-14 sm:w-14 sm:text-[40px]"
                 aria-label="Close image viewer"
               >
-                Close
+                ×
               </button>
             </div>
 
@@ -136,7 +136,7 @@ export function ProjectLightboxGallery({ images, className = "" }: ProjectLightb
                 <button
                   type="button"
                   onClick={showPrevious}
-                  className="shrink-0 px-1 py-6 text-[28px] font-light leading-none text-foreground transition-opacity hover:opacity-55 sm:px-2 sm:text-[36px]"
+                  className="flex h-16 w-12 shrink-0 items-center justify-center text-[36px] font-light leading-none text-foreground transition-opacity hover:opacity-55 sm:h-20 sm:w-16 sm:text-[48px] lg:h-24 lg:w-20 lg:text-[64px]"
                   aria-label="Previous image"
                 >
                   {"<"}
@@ -156,7 +156,7 @@ export function ProjectLightboxGallery({ images, className = "" }: ProjectLightb
                 <button
                   type="button"
                   onClick={showNext}
-                  className="shrink-0 px-1 py-6 text-[28px] font-light leading-none text-foreground transition-opacity hover:opacity-55 sm:px-2 sm:text-[36px]"
+                  className="flex h-16 w-12 shrink-0 items-center justify-center text-[36px] font-light leading-none text-foreground transition-opacity hover:opacity-55 sm:h-20 sm:w-16 sm:text-[48px] lg:h-24 lg:w-20 lg:text-[64px]"
                   aria-label="Next image"
                 >
                   {">"}
