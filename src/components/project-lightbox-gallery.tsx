@@ -1,8 +1,10 @@
 "use client";
 
-import { KeyboardEvent, MouseEvent, useCallback, useEffect, useState } from "react";
+import { MouseEvent, useCallback, useEffect, useState } from "react";
 
-type ProjectLightboxImage = {
+import { getOptimizedImageUrl } from "@/lib/image-utils";
+
+export type ProjectLightboxImage = {
   src: string;
   alt?: string;
 };
@@ -12,68 +14,67 @@ type ProjectLightboxGalleryProps = {
   className?: string;
 };
 
-export function ProjectLightboxGallery({ images, className = "" }: ProjectLightboxGalleryProps) {
+export function ProjectLightboxGallery({
+  images,
+  className = "",
+}: ProjectLightboxGalleryProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const isOpen = activeIndex !== null;
-  const activeImage = activeIndex !== null ? images[activeIndex] : null;
+  const activeImage = activeIndex === null ? null : images[activeIndex];
   const hasMultipleImages = images.length > 1;
 
-  function closeLightbox() {
+  const closeLightbox = useCallback(() => {
     setActiveIndex(null);
-  }
+  }, []);
 
   const showPrevious = useCallback(() => {
-    setActiveIndex((current) => {
-      if (current === null) {
-        return current;
+    if (!hasMultipleImages) {
+      return;
+    }
+
+    setActiveIndex((currentIndex) => {
+      if (currentIndex === null) {
+        return currentIndex;
       }
 
-      return current === 0 ? images.length - 1 : current - 1;
+      return currentIndex === 0 ? images.length - 1 : currentIndex - 1;
     });
-  }, [images.length]);
+  }, [hasMultipleImages, images.length]);
 
   const showNext = useCallback(() => {
-    setActiveIndex((current) => {
-      if (current === null) {
-        return current;
+    if (!hasMultipleImages) {
+      return;
+    }
+
+    setActiveIndex((currentIndex) => {
+      if (currentIndex === null) {
+        return currentIndex;
       }
 
-      return current === images.length - 1 ? 0 : current + 1;
+      return currentIndex === images.length - 1 ? 0 : currentIndex + 1;
     });
-  }, [images.length]);
-
-  function stopClick(event: MouseEvent) {
-    event.stopPropagation();
-  }
-
-  function handleThumbnailKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      setActiveIndex(index);
-    }
-  }
+  }, [hasMultipleImages, images.length]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (activeIndex === null) {
       return;
     }
 
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    function handleKeyDown(event: globalThis.KeyboardEvent) {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         closeLightbox();
       }
 
-      if (event.key === "ArrowLeft" && hasMultipleImages) {
+      if (event.key === "ArrowLeft") {
         showPrevious();
       }
 
-      if (event.key === "ArrowRight" && hasMultipleImages) {
+      if (event.key === "ArrowRight") {
         showNext();
       }
-    }
+    };
 
     window.addEventListener("keydown", handleKeyDown);
 
@@ -81,95 +82,107 @@ export function ProjectLightboxGallery({ images, className = "" }: ProjectLightb
       document.body.style.overflow = originalOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [hasMultipleImages, isOpen, images.length, showNext, showPrevious]);
+  }, [activeIndex, closeLightbox, showNext, showPrevious]);
 
-  function renderImageButton(image: ProjectLightboxImage, index: number, imageClassName = "block h-auto w-full") {
-    return (
-      <button
-        type="button"
-        onClick={() => setActiveIndex(index)}
-        onKeyDown={(event) => handleThumbnailKeyDown(event, index)}
-        className="block w-full cursor-pointer bg-transparent p-0 text-left"
-        aria-label={`${image.alt || "Project image"} 크게 보기`}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={image.src} alt={image.alt || ""} className={imageClassName} />
-      </button>
-    );
+  const handleOverlayClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      closeLightbox();
+    }
+  };
+
+  if (images.length === 0) {
+    return null;
   }
 
   return (
     <>
-      <section className={className} aria-label="프로젝트 이미지 갤러리">
+      <section className={className}>
         {images.map((image, index) => (
           <figure key={`${image.src}-${index}`} className="mb-1.5 break-inside-avoid">
-            {renderImageButton(image, index)}
+            <button
+              type="button"
+              className="block w-full cursor-pointer border-0 bg-transparent p-0 text-left"
+              onClick={() => setActiveIndex(index)}
+              aria-label={`Open image ${index + 1}`}
+            >
+              <img
+                src={getOptimizedImageUrl(image.src, {
+                  width: 1400,
+                  quality: 82,
+                  resize: "contain",
+                })}
+                alt={image.alt ?? ""}
+                className="block h-auto w-full"
+                loading={index < 3 ? "eager" : "lazy"}
+                decoding="async"
+              />
+            </button>
           </figure>
         ))}
       </section>
 
-      {isOpen && activeImage ? (
+      {activeImage ? (
         <div
-          className="fixed inset-0 z-50 grid bg-white/95 px-4 py-5 sm:px-8"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/95 px-4 py-6"
+          onClick={handleOverlayClick}
           role="dialog"
           aria-modal="true"
           aria-label="Image viewer"
-          onClick={closeLightbox}
         >
-          <div className="grid h-full grid-rows-[auto_1fr_auto] gap-4">
-            <div className="flex items-center justify-between text-[12px] uppercase tracking-[0.09em] text-muted">
-              <span>
-                {activeIndex + 1} / {images.length}
-              </span>
+          <button
+            type="button"
+            className="fixed right-4 top-4 z-50 flex h-12 w-12 cursor-pointer items-center justify-center border-0 bg-transparent text-[32px] font-light leading-none text-neutral-900 transition-opacity hover:opacity-50 sm:right-6 sm:top-6 sm:h-14 sm:w-14 sm:text-[40px]"
+            onClick={closeLightbox}
+            aria-label="Close image viewer"
+          >
+            ×
+          </button>
+
+          <div className="flex max-w-full items-center justify-center gap-2 sm:gap-4 lg:gap-6">
+            {hasMultipleImages ? (
               <button
                 type="button"
-                onClick={closeLightbox}
-                className="flex h-12 w-12 items-center justify-center text-[32px] font-light leading-none text-foreground transition-opacity hover:opacity-55 sm:h-14 sm:w-14 sm:text-[40px]"
-                aria-label="Close image viewer"
+                className="flex h-16 w-12 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent text-[36px] font-light leading-none text-neutral-900 transition-opacity hover:opacity-50 sm:h-20 sm:w-16 sm:text-[48px] lg:h-24 lg:w-20 lg:text-[64px]"
+                onClick={showPrevious}
+                aria-label="Show previous image"
               >
-                ×
+                {"<"}
               </button>
-            </div>
+            ) : null}
 
-            <div className="flex min-h-0 items-center justify-center gap-3 sm:gap-5" onClick={stopClick}>
-              {hasMultipleImages ? (
-                <button
-                  type="button"
-                  onClick={showPrevious}
-                  className="flex h-16 w-12 shrink-0 items-center justify-center text-[36px] font-light leading-none text-foreground transition-opacity hover:opacity-55 sm:h-20 sm:w-16 sm:text-[48px] lg:h-24 lg:w-20 lg:text-[64px]"
-                  aria-label="Previous image"
-                >
-                  {"<"}
-                </button>
-              ) : null}
+            <img
+              src={getOptimizedImageUrl(activeImage.src, {
+                width: 2000,
+                quality: 85,
+                resize: "contain",
+              })}
+              alt={activeImage.alt ?? ""}
+              className="max-h-[85vh] max-w-[78vw] object-contain sm:max-w-[84vw] lg:max-w-[86vw]"
+              loading="eager"
+              decoding="async"
+            />
 
-              <div className="grid min-h-0 place-items-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={activeImage.src}
-                  alt={activeImage.alt || ""}
-                  className="max-h-[82vh] max-w-[calc(94vw-72px)] object-contain sm:max-h-[85vh] sm:max-w-[85vw]"
-                />
-              </div>
-
-              {hasMultipleImages ? (
-                <button
-                  type="button"
-                  onClick={showNext}
-                  className="flex h-16 w-12 shrink-0 items-center justify-center text-[36px] font-light leading-none text-foreground transition-opacity hover:opacity-55 sm:h-20 sm:w-16 sm:text-[48px] lg:h-24 lg:w-20 lg:text-[64px]"
-                  aria-label="Next image"
-                >
-                  {">"}
-                </button>
-              ) : null}
-            </div>
-
-            <p className="text-center text-[11px] uppercase tracking-[0.09em] text-muted">
-              ESC / ← / →
-            </p>
+            {hasMultipleImages ? (
+              <button
+                type="button"
+                className="flex h-16 w-12 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent text-[36px] font-light leading-none text-neutral-900 transition-opacity hover:opacity-50 sm:h-20 sm:w-16 sm:text-[48px] lg:h-24 lg:w-20 lg:text-[64px]"
+                onClick={showNext}
+                aria-label="Show next image"
+              >
+                {">"}
+              </button>
+            ) : null}
           </div>
+
+          {hasMultipleImages ? (
+            <p className="mt-4 text-xs tracking-[0.18em] text-neutral-600">
+              {(activeIndex ?? 0) + 1} / {images.length}
+            </p>
+          ) : null}
         </div>
       ) : null}
     </>
   );
 }
+
+export default ProjectLightboxGallery;
