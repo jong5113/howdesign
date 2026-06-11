@@ -57,6 +57,9 @@ npm.cmd run dev
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ADMIN_PASSWORD=your_admin_password
+RESEND_API_KEY=your_resend_api_key
+CONTACT_TO_EMAIL=jong51133@nate.com
+CONTACT_FROM_EMAIL="HOW DESIGN <onboarding@resend.dev>"
 ```
 
 - `.env.local`은 로컬 전용 파일입니다.
@@ -280,6 +283,25 @@ Supabase 연결과 데이터 상태를 확인할 수 있습니다.
 - `https://howdesign.vercel.app/api/debug/portfolio?slug=daedong-eel-yeouido`
 
 anon key 전체 값은 노출하지 않고, 존재 여부만 표시합니다.
+
+## Contact 이메일 발송
+
+`/contact` 페이지의 문의 폼은 `/api/contact`로 전송되고, Resend API를 통해 회사 이메일로 전달됩니다.
+
+필요 환경변수:
+
+```bash
+RESEND_API_KEY=your_resend_api_key
+CONTACT_TO_EMAIL=jong51133@nate.com
+CONTACT_FROM_EMAIL="HOW DESIGN <onboarding@resend.dev>"
+```
+
+- `RESEND_API_KEY`는 Resend에서 발급받은 API Key입니다.
+- `CONTACT_TO_EMAIL` 기본 수신 주소는 `jong51133@nate.com`입니다.
+- `CONTACT_FROM_EMAIL`은 테스트 시 `HOW DESIGN <onboarding@resend.dev>`를 사용할 수 있습니다.
+- 운영에서는 Resend에서 도메인 인증 후 실제 발신 도메인 메일을 사용하는 것을 권장합니다.
+- Vercel에서도 같은 환경변수를 `Settings → Environment Variables`에 추가하고 Redeploy 해야 합니다.
+- 봇 방지를 위해 화면에 보이지 않는 honeypot 필드를 사용합니다.
 
 ## GitHub 업로드
 
