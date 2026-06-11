@@ -1,6 +1,6 @@
 "use client";
 
-import { MouseEvent, useCallback, useEffect, useState } from "react";
+import { MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import { getOptimizedImageUrl } from "@/lib/image-utils";
 
@@ -19,40 +19,58 @@ export function ProjectLightboxGallery({
   className = "",
 }: ProjectLightboxGalleryProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const activeImage = activeIndex === null ? null : images[activeIndex];
-  const hasMultipleImages = images.length > 1;
+  const [brokenImageUrls, setBrokenImageUrls] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const visibleImages = useMemo(
+    () =>
+      images.filter(
+        (image) => image.src.trim() && !brokenImageUrls.has(image.src),
+      ),
+    [brokenImageUrls, images],
+  );
+  const safeActiveIndex =
+    activeIndex === null || visibleImages.length === 0
+      ? null
+      : Math.min(activeIndex, visibleImages.length - 1);
+  const activeImage =
+    safeActiveIndex === null ? null : visibleImages[safeActiveIndex];
+  const hasMultipleImages = visibleImages.length > 1;
+
+  const openLightbox = useCallback(
+    (index: number) => {
+      if (index < 0 || index >= visibleImages.length) {
+        return;
+      }
+
+      setActiveIndex(index);
+    },
+    [visibleImages.length],
+  );
 
   const closeLightbox = useCallback(() => {
     setActiveIndex(null);
   }, []);
 
   const showPrevious = useCallback(() => {
-    if (!hasMultipleImages) {
+    if (!hasMultipleImages || safeActiveIndex === null) {
       return;
     }
 
-    setActiveIndex((currentIndex) => {
-      if (currentIndex === null) {
-        return currentIndex;
-      }
-
-      return currentIndex === 0 ? images.length - 1 : currentIndex - 1;
-    });
-  }, [hasMultipleImages, images.length]);
+    setActiveIndex(
+      safeActiveIndex === 0 ? visibleImages.length - 1 : safeActiveIndex - 1,
+    );
+  }, [hasMultipleImages, safeActiveIndex, visibleImages.length]);
 
   const showNext = useCallback(() => {
-    if (!hasMultipleImages) {
+    if (!hasMultipleImages || safeActiveIndex === null) {
       return;
     }
 
-    setActiveIndex((currentIndex) => {
-      if (currentIndex === null) {
-        return currentIndex;
-      }
-
-      return currentIndex === images.length - 1 ? 0 : currentIndex + 1;
-    });
-  }, [hasMultipleImages, images.length]);
+    setActiveIndex(
+      safeActiveIndex === visibleImages.length - 1 ? 0 : safeActiveIndex + 1,
+    );
+  }, [hasMultipleImages, safeActiveIndex, visibleImages.length]);
 
   useEffect(() => {
     if (activeIndex === null) {
@@ -90,19 +108,19 @@ export function ProjectLightboxGallery({
     }
   };
 
-  if (images.length === 0) {
+  if (visibleImages.length === 0) {
     return null;
   }
 
   return (
     <>
       <section className={className}>
-        {images.map((image, index) => (
+        {visibleImages.map((image, index) => (
           <figure key={`${image.src}-${index}`} className="mb-1.5 break-inside-avoid">
             <button
               type="button"
               className="block w-full cursor-pointer border-0 bg-transparent p-0 text-left"
-              onClick={() => setActiveIndex(index)}
+              onClick={() => openLightbox(index)}
               aria-label={`Open image ${index + 1}`}
             >
               <img
@@ -115,6 +133,13 @@ export function ProjectLightboxGallery({
                 className="block h-auto w-full"
                 loading={index < 3 ? "eager" : "lazy"}
                 decoding="async"
+                onError={() => {
+                  setBrokenImageUrls((currentUrls) => {
+                    const nextUrls = new Set(currentUrls);
+                    nextUrls.add(image.src);
+                    return nextUrls;
+                  });
+                }}
               />
             </button>
           </figure>
@@ -176,7 +201,7 @@ export function ProjectLightboxGallery({
 
           {hasMultipleImages ? (
             <p className="mt-4 text-xs tracking-[0.18em] text-neutral-600">
-              {(activeIndex ?? 0) + 1} / {images.length}
+              {(safeActiveIndex ?? 0) + 1} / {visibleImages.length}
             </p>
           ) : null}
         </div>
