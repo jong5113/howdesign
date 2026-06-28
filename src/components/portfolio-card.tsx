@@ -13,6 +13,26 @@ type PortfolioCardProps = {
   priority?: boolean;
 };
 
+function getVerticalFocus(position: string) {
+  const normalizedPosition = position.trim().toLowerCase();
+  const parts = normalizedPosition.split(/\s+/);
+  const verticalValue = parts[1] || parts[0] || "center";
+
+  if (verticalValue === "top") {
+    return "0%";
+  }
+
+  if (verticalValue === "bottom") {
+    return "100%";
+  }
+
+  if (/^\d+(\.\d+)?%$/.test(verticalValue)) {
+    return verticalValue;
+  }
+
+  return "50%";
+}
+
 export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
   const originalCoverImage = item.coverImageUrl || item.coverImage;
   const optimizedCoverImage = useMemo(
@@ -20,7 +40,7 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
       getOptimizedImageUrl(originalCoverImage, {
         width: 1200,
         quality: 82,
-        resize: "cover",
+        resize: "contain",
       }),
     [originalCoverImage],
   );
@@ -29,19 +49,24 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
   const siteLine = getSiteLine(item);
   const areaLine = getAreaLine(item);
   const coverObjectPosition = item.coverObjectPosition || "center center";
+  const verticalFocus = getVerticalFocus(coverObjectPosition);
 
   return (
     <Link href={`/portfolio/${item.slug}`} className="block">
-      <figure className="relative aspect-[4/3] w-full overflow-hidden bg-[#f5f5f5]">
+      <figure className="relative aspect-[3/2] w-full overflow-hidden bg-[#f5f5f5]">
         {showImage ? (
           <Image
             src={imageSrc}
             alt=""
-            fill
+            width={1200}
+            height={900}
             priority={priority}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover object-center"
-            style={{ objectPosition: coverObjectPosition }}
+            className="absolute left-0 h-auto w-full max-w-none"
+            style={{
+              top: verticalFocus,
+              transform: `translateY(-${verticalFocus})`,
+            }}
             onError={() => {
               if (imageSrc !== originalCoverImage && originalCoverImage) {
                 setImageSrc(originalCoverImage);
