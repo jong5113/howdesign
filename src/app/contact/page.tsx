@@ -32,7 +32,7 @@ const contactHeroImage = "/contact-hero.png";
 
 export default function ContactPage() {
   return (
-    <main className="px-5 pb-20 pt-44 sm:px-10 sm:pt-52 lg:px-12 lg:pt-56">
+    <main className="px-5 pb-20 pt-10 sm:px-10 sm:pt-12 lg:px-12 lg:pt-14">
       <div className="mx-auto grid max-w-[1180px] gap-12">
         <header className="grid gap-6">
           <h1 className="text-[34px] font-normal uppercase tracking-[0.08em] sm:text-[46px] lg:text-[56px]">

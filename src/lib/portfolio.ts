@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 import { hasSupabaseConfig, supabaseClient } from "@/lib/supabase/client";
 import {
   getFeaturedSamplePortfolios,
@@ -8,6 +10,39 @@ import {
 import type { PortfolioCategory, PortfolioItem } from "@/lib/types";
 
 export const PROJECT_SELECT_COLUMNS = `
+  id,
+  title,
+  slug,
+  category,
+  subtitle,
+  location,
+  area,
+  scope,
+  duration,
+  year,
+  description,
+  cover_image_url,
+  featured,
+  published,
+  display_order,
+  created_at
+`;
+
+export const PROJECT_LIST_SELECT_COLUMNS = `
+  id,
+  title,
+  slug,
+  category,
+  location,
+  area,
+  cover_image_url,
+  featured,
+  published,
+  display_order,
+  created_at
+`;
+
+export const PROJECT_DETAIL_SELECT_COLUMNS = `
   id,
   title,
   slug,
@@ -115,7 +150,9 @@ export function normalizeProject(
   };
 }
 
-async function fetchProjects(options: { featured?: boolean; category?: PortfolioCategory } = {}) {
+const PUBLIC_PORTFOLIO_REVALIDATE_SECONDS = 600;
+
+async function fetchProjectList(options: { featured?: boolean; category?: PortfolioCategory } = {}) {
   if (!hasSupabaseConfig || !supabaseClient) {
     console.error("[Supabase] Portfolio query skipped because Supabase environment variables are missing.");
     return null;
@@ -124,7 +161,7 @@ async function fetchProjects(options: { featured?: boolean; category?: Portfolio
   try {
     let query = supabaseClient
       .from("portfolio_projects")
-      .select(PROJECT_SELECT_COLUMNS)
+      .select(PROJECT_LIST_SELECT_COLUMNS)
       .eq("published", true)
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: false });
@@ -177,7 +214,19 @@ export async function fetchProjectImages(projectId: string) {
 }
 
 export async function getPublishedPortfolios() {
-  const portfolios = await fetchProjects();
+  return getCachedPublishedPortfolios();
+}
+
+export async function getFeaturedPortfolios() {
+  return getCachedFeaturedPortfolios();
+}
+
+export async function getPortfoliosByCategory(category: PortfolioCategory) {
+  return getCachedPortfoliosByCategory(category);
+}
+
+async function getPublishedPortfoliosUncached() {
+  const portfolios = await fetchProjectList();
 
   if (portfolios === null || portfolios.length === 0) {
     return getPublishedSamplePortfolios();
@@ -186,8 +235,8 @@ export async function getPublishedPortfolios() {
   return portfolios;
 }
 
-export async function getFeaturedPortfolios() {
-  const portfolios = await fetchProjects({ featured: true });
+async function getFeaturedPortfoliosUncached() {
+  const portfolios = await fetchProjectList({ featured: true });
 
   if (portfolios === null) {
     return getFeaturedSamplePortfolios();
@@ -197,7 +246,7 @@ export async function getFeaturedPortfolios() {
     return portfolios;
   }
 
-  const publishedPortfolios = await fetchProjects();
+  const publishedPortfolios = await fetchProjectList();
 
   if (publishedPortfolios === null || publishedPortfolios.length === 0) {
     return getFeaturedSamplePortfolios();
@@ -206,8 +255,8 @@ export async function getFeaturedPortfolios() {
   return [];
 }
 
-export async function getPortfoliosByCategory(category: PortfolioCategory) {
-  const portfolios = await fetchProjects({ category });
+async function getPortfoliosByCategoryUncached(category: PortfolioCategory) {
+  const portfolios = await fetchProjectList({ category });
 
   if (portfolios === null) {
     return getPublishedSamplePortfolios().filter((portfolio) => portfolio.category === category);
@@ -217,7 +266,7 @@ export async function getPortfoliosByCategory(category: PortfolioCategory) {
     return portfolios;
   }
 
-  const publishedPortfolios = await fetchProjects();
+  const publishedPortfolios = await fetchProjectList();
 
   if (publishedPortfolios === null || publishedPortfolios.length === 0) {
     return getPublishedSamplePortfolios().filter((portfolio) => portfolio.category === category);
@@ -226,14 +275,14 @@ export async function getPortfoliosByCategory(category: PortfolioCategory) {
   return [];
 }
 
-export async function getPortfolioBySlug(slug: string) {
+async function getPortfolioBySlugUncached(slug: string) {
   const normalizedSlug = decodeURIComponent(slug).trim();
 
   if (hasSupabaseConfig && supabaseClient) {
     try {
       const { data, error } = await supabaseClient
         .from("portfolio_projects")
-        .select(PROJECT_SELECT_COLUMNS)
+        .select(PROJECT_DETAIL_SELECT_COLUMNS)
         .eq("slug", normalizedSlug)
         .eq("published", true)
         .limit(1)
@@ -252,7 +301,7 @@ export async function getPortfolioBySlug(slug: string) {
         }
       }
 
-      const publishedPortfolios = await fetchProjects();
+      const publishedPortfolios = await fetchProjectList();
 
       if (publishedPortfolios && publishedPortfolios.length > 0) {
         return undefined;
@@ -265,3 +314,27 @@ export async function getPortfolioBySlug(slug: string) {
 
   return getPortfolioSampleBySlug(normalizedSlug);
 }
+
+const getCachedPublishedPortfolios = unstable_cache(
+  getPublishedPortfoliosUncached,
+  ["published-portfolios"],
+  { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS },
+);
+
+const getCachedFeaturedPortfolios = unstable_cache(
+  getFeaturedPortfoliosUncached,
+  ["featured-portfolios"],
+  { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS },
+);
+
+const getCachedPortfoliosByCategory = unstable_cache(
+  getPortfoliosByCategoryUncached,
+  ["portfolios-by-category"],
+  { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS },
+);
+
+export const getPortfolioBySlug = unstable_cache(
+  getPortfolioBySlugUncached,
+  ["portfolio-by-slug"],
+  { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS },
+);

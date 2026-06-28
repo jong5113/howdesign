@@ -15,7 +15,7 @@ const navItems = [
 
 export function SiteHeader() {
   return (
-    <header className="fixed left-0 top-0 z-40 w-full bg-white/90 px-5 py-6 backdrop-blur-sm sm:px-10 sm:py-7">
+    <header className="px-5 py-6 sm:px-10 sm:py-7">
       <div className="mx-auto grid max-w-[1760px] justify-items-center gap-4">
         <Link href="/" aria-label="Go to home" className="inline-flex">
           <BrandMark placement="header" priority />

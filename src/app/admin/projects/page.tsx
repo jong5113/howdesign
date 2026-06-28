@@ -40,7 +40,7 @@ export default async function AdminProjectsPage() {
   }
 
   return (
-    <div className="px-5 pb-16 pt-36 sm:px-10 sm:pt-44 lg:px-12">
+    <div className="px-5 pb-16 pt-8 sm:px-10 sm:pt-12 lg:px-12">
       <main className="mx-auto grid max-w-[1760px] gap-10">
         <header className="grid gap-5 sm:grid-cols-[1fr_auto] sm:items-start">
           <div className="grid gap-3">

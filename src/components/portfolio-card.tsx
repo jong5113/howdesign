@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { getAreaLine, getProjectTitleLine, getSiteLine } from "@/lib/portfolio-display";
+import { getOptimizedImageUrl } from "@/lib/image-utils";
 import type { PortfolioItem } from "@/lib/types";
 
 type PortfolioCardProps = {
@@ -10,7 +11,11 @@ type PortfolioCardProps = {
 };
 
 export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
-  const coverImage = item.coverImageUrl || item.coverImage;
+  const coverImage = getOptimizedImageUrl(item.coverImageUrl || item.coverImage, {
+    width: 900,
+    quality: 78,
+    resize: "cover",
+  });
   const siteLine = getSiteLine(item);
   const areaLine = getAreaLine(item);
 
@@ -22,7 +27,6 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
           alt={item.title}
           fill
           priority={priority}
-          unoptimized
           sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 46vw, 100vw"
           className="object-cover"
         />

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import { getOptimizedImageUrl } from "@/lib/image-utils";
@@ -123,15 +124,18 @@ export function ProjectLightboxGallery({
               onClick={() => openLightbox(index)}
               aria-label={`Open image ${index + 1}`}
             >
-              <img
+              <Image
                 src={getOptimizedImageUrl(image.src, {
                   width: 1400,
                   quality: 82,
                   resize: "contain",
                 })}
                 alt={image.alt ?? ""}
+                width={1400}
+                height={933}
+                sizes="(min-width: 1024px) 31vw, (min-width: 640px) 48vw, 100vw"
                 className="block h-auto w-full"
-                loading={index < 3 ? "eager" : "lazy"}
+                priority={index === 0}
                 decoding="async"
                 onError={() => {
                   setBrokenImageUrls((currentUrls) => {
@@ -175,13 +179,16 @@ export function ProjectLightboxGallery({
               </button>
             ) : null}
 
-            <img
+            <Image
               src={getOptimizedImageUrl(activeImage.src, {
                 width: 2000,
                 quality: 85,
                 resize: "contain",
               })}
               alt={activeImage.alt ?? ""}
+              width={2000}
+              height={1333}
+              sizes="86vw"
               className="max-h-[85vh] max-w-[78vw] object-contain sm:max-w-[84vw] lg:max-w-[86vw]"
               loading="eager"
               decoding="async"

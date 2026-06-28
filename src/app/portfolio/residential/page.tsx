@@ -7,14 +7,13 @@ export const metadata = {
   title: "Residential Portfolio",
 };
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 600;
 
 export default async function ResidentialPortfolioPage() {
   const portfolios = await getPortfoliosByCategory("residential");
 
   return (
-    <div className="px-5 pb-16 pt-36 sm:px-10 sm:pt-44 lg:px-12">
+    <div className="px-5 pb-16 pt-8 sm:px-10 sm:pt-12 lg:px-12">
       <div className="mx-auto max-w-[1440px]">
         <PageIntro eyebrow="Works" title="Residential" />
         <PortfolioFilter active="residential" />

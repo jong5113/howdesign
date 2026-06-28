@@ -16,13 +16,5 @@ if (!hasSupabaseConfig) {
 
 export const supabaseClient =
   supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey, {
-        global: {
-          fetch: (input, init) =>
-            fetch(input, {
-              ...init,
-              cache: "no-store",
-            }),
-        },
-      })
+    ? createClient(supabaseUrl, supabaseAnonKey)
     : null;
