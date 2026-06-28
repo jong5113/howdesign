@@ -14,6 +14,7 @@ export type PortfolioItem = {
   description: string;
   coverImage: string;
   coverImageUrl?: string;
+  coverObjectPosition?: string;
   gallery: string[];
   featured: boolean;
   published: boolean;

@@ -28,6 +28,7 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
   const [showImage, setShowImage] = useState(Boolean(optimizedCoverImage));
   const siteLine = getSiteLine(item);
   const areaLine = getAreaLine(item);
+  const coverObjectPosition = item.coverObjectPosition || "center center";
 
   return (
     <Link href={`/portfolio/${item.slug}`} className="block">
@@ -40,6 +41,7 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
             priority={priority}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover object-center"
+            style={{ objectPosition: coverObjectPosition }}
             onError={() => {
               if (imageSrc !== originalCoverImage && originalCoverImage) {
                 setImageSrc(originalCoverImage);

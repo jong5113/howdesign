@@ -16,12 +16,14 @@ function getLogoSrc() {
   const logoSvgPath = path.join(process.cwd(), "public", "logo.svg");
   const logoPngPath = path.join(process.cwd(), "public", "logo.png");
 
-  if (fs.existsSync(logoSvgPath)) {
-    return "/logo.svg";
+  if (fs.existsSync(logoPngPath)) {
+    const version = Math.round(fs.statSync(logoPngPath).mtimeMs);
+    return `/logo.png?v=${version}`;
   }
 
-  if (fs.existsSync(logoPngPath)) {
-    return "/logo.png";
+  if (fs.existsSync(logoSvgPath)) {
+    const version = Math.round(fs.statSync(logoSvgPath).mtimeMs);
+    return `/logo.svg?v=${version}`;
   }
 
   return null;

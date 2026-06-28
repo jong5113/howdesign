@@ -30,6 +30,7 @@ type ProjectFormState = {
   featured: boolean;
   published: boolean;
   displayOrder: string;
+  coverObjectPosition: string;
 };
 
 type ProjectRow = {
@@ -48,6 +49,7 @@ type ProjectRow = {
   featured: boolean | null;
   published: boolean | null;
   display_order: number | null;
+  cover_object_position?: string | null;
 };
 
 type ImageRow = {
@@ -104,6 +106,7 @@ const emptyForm: ProjectFormState = {
   featured: false,
   published: true,
   displayOrder: "100",
+  coverObjectPosition: "center center",
 };
 
 function formatSupabaseError(error: SupabaseErrorLike) {
@@ -175,13 +178,26 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
         return;
       }
 
-      const { data: project, error: projectError } = await supabaseClient
+      let { data: project, error: projectError } = await supabaseClient
         .from("portfolio_projects")
         .select(
-          "id, title, slug, category, subtitle, location, area, scope, duration, year, description, cover_image_url, featured, published, display_order",
+          "id, title, slug, category, subtitle, location, area, scope, duration, year, description, cover_image_url, cover_object_position, featured, published, display_order",
         )
         .eq("id", projectId)
         .maybeSingle<ProjectRow>();
+
+      if (projectError && projectError.message.includes("cover_object_position")) {
+        const fallbackResult = await supabaseClient
+          .from("portfolio_projects")
+          .select(
+            "id, title, slug, category, subtitle, location, area, scope, duration, year, description, cover_image_url, featured, published, display_order",
+          )
+          .eq("id", projectId)
+          .maybeSingle<ProjectRow>();
+
+        project = fallbackResult.data;
+        projectError = fallbackResult.error;
+      }
 
       if (projectError || !project) {
         console.error("[Admin edit] Failed to load project.", projectError);
@@ -229,6 +245,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
         featured: Boolean(project.featured),
         published: Boolean(project.published),
         displayOrder: String(project.display_order ?? 100),
+        coverObjectPosition: project.cover_object_position || "center center",
       });
       setImages(nextImages);
       setCoverImageId(coverImage?.id || manualCoverId);
@@ -420,25 +437,39 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
           : savedImages[coverIndex]?.imageUrl || savedImages[0]?.imageUrl || form.coverImageUrl.trim();
 
       setMessage("Updating project...");
-      const { error: projectError } = await client
+      const projectPayload = {
+        title: form.title.trim(),
+        slug,
+        category: form.category,
+        subtitle: form.subtitle.trim() || null,
+        location: form.location.trim() || null,
+        area: form.area.trim() || null,
+        scope: form.scope.trim() || null,
+        duration: form.duration.trim() || null,
+        year: form.year.trim() || null,
+        description: form.description.trim() || null,
+        cover_image_url: coverImageUrl || null,
+        cover_object_position: form.coverObjectPosition.trim() || "center center",
+        featured: form.featured,
+        published: form.published,
+        display_order: Number(form.displayOrder) || 100,
+      };
+
+      let { error: projectError } = await client
         .from("portfolio_projects")
-        .update({
-          title: form.title.trim(),
-          slug,
-          category: form.category,
-          subtitle: form.subtitle.trim() || null,
-          location: form.location.trim() || null,
-          area: form.area.trim() || null,
-          scope: form.scope.trim() || null,
-          duration: form.duration.trim() || null,
-          year: form.year.trim() || null,
-          description: form.description.trim() || null,
-          cover_image_url: coverImageUrl || null,
-          featured: form.featured,
-          published: form.published,
-          display_order: Number(form.displayOrder) || 100,
-        })
+        .update(projectPayload)
         .eq("id", projectId);
+
+      if (projectError && projectError.message.includes("cover_object_position")) {
+        const fallbackPayload = { ...projectPayload };
+        delete (fallbackPayload as Partial<typeof fallbackPayload>).cover_object_position;
+        const fallbackResult = await client
+          .from("portfolio_projects")
+          .update(fallbackPayload)
+          .eq("id", projectId);
+
+        projectError = fallbackResult.error;
+      }
 
       if (projectError) {
         console.error("[Admin edit] Project update failed.", projectError);
@@ -566,6 +597,18 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
             inputMode="numeric"
             placeholder="낮은 숫자가 먼저 노출됩니다"
           />
+        </label>
+        <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">
+          Cover Position
+          <input
+            value={form.coverObjectPosition}
+            onChange={(event) => updateField("coverObjectPosition", event.target.value)}
+            className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
+            placeholder="center center"
+          />
+          <span className="text-[11px] normal-case tracking-normal text-muted">
+            Thumbnail focus. Examples: center center, center top, center 35%
+          </span>
         </label>
         {[
           { field: "subtitle", label: "Subtitle / 현장명(영문)", placeholder: "예: DAEDONG EEL YEOUIDO" },

@@ -22,6 +22,7 @@ export const PROJECT_SELECT_COLUMNS = `
   year,
   description,
   cover_image_url,
+  cover_object_position,
   featured,
   published,
   display_order,
@@ -36,6 +37,7 @@ export const PROJECT_LIST_SELECT_COLUMNS = `
   location,
   area,
   cover_image_url,
+  cover_object_position,
   featured,
   published,
   display_order,
@@ -55,6 +57,7 @@ export const PROJECT_DETAIL_SELECT_COLUMNS = `
   year,
   description,
   cover_image_url,
+  cover_object_position,
   featured,
   published,
   display_order,
@@ -83,6 +86,7 @@ export type PortfolioProjectRow = {
   year: string | number | null;
   description: string | null;
   cover_image_url: string | null;
+  cover_object_position?: string | null;
   featured: boolean | null;
   published: boolean | null;
   display_order: number | null;
@@ -104,6 +108,16 @@ function isPortfolioCategory(category: unknown): category is PortfolioCategory {
 
 function normalizeText(value: string | null | undefined) {
   return value?.trim() || "";
+}
+
+function normalizeObjectPosition(value: string | null | undefined) {
+  const position = normalizeText(value);
+
+  if (!position) {
+    return "center center";
+  }
+
+  return /^[a-zA-Z0-9.%\s-]+$/.test(position) ? position : "center center";
 }
 
 export function normalizeProject(
@@ -140,6 +154,7 @@ export function normalizeProject(
     description: normalizeText(project.description),
     coverImage: coverImageUrl || fallbackCoverImage,
     coverImageUrl,
+    coverObjectPosition: normalizeObjectPosition(project.cover_object_position),
     gallery: images
       .map((image) => normalizeText(image.image_url))
       .filter(Boolean),
@@ -174,7 +189,28 @@ async function fetchProjectList(options: { featured?: boolean; category?: Portfo
       query = query.eq("category", options.category);
     }
 
-    const { data, error } = await query;
+    let { data, error } = await query;
+
+    if (error && error.message.includes("cover_object_position")) {
+      let fallbackQuery = supabaseClient
+        .from("portfolio_projects")
+        .select(PROJECT_LIST_SELECT_COLUMNS.replace("cover_object_position,", ""))
+        .eq("published", true)
+        .order("display_order", { ascending: true })
+        .order("created_at", { ascending: false });
+
+      if (options.featured) {
+        fallbackQuery = fallbackQuery.eq("featured", true);
+      }
+
+      if (options.category) {
+        fallbackQuery = fallbackQuery.eq("category", options.category);
+      }
+
+      const fallbackResult = await fallbackQuery;
+      data = fallbackResult.data as typeof data;
+      error = fallbackResult.error;
+    }
 
     if (error) {
       console.error("[Supabase] Failed to fetch portfolio_projects.", error.message);
@@ -280,13 +316,26 @@ async function getPortfolioBySlugUncached(slug: string) {
 
   if (hasSupabaseConfig && supabaseClient) {
     try {
-      const { data, error } = await supabaseClient
+      let { data, error } = await supabaseClient
         .from("portfolio_projects")
         .select(PROJECT_DETAIL_SELECT_COLUMNS)
         .eq("slug", normalizedSlug)
         .eq("published", true)
         .limit(1)
         .maybeSingle();
+
+      if (error && error.message.includes("cover_object_position")) {
+        const fallbackResult = await supabaseClient
+          .from("portfolio_projects")
+          .select(PROJECT_DETAIL_SELECT_COLUMNS.replace("cover_object_position,", ""))
+          .eq("slug", normalizedSlug)
+          .eq("published", true)
+          .limit(1)
+          .maybeSingle();
+
+        data = fallbackResult.data as typeof data;
+        error = fallbackResult.error;
+      }
 
       if (error) {
         console.error("[Supabase] Failed to fetch portfolio project by slug.", error.message);
