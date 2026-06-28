@@ -12,23 +12,23 @@ type PortfolioCardProps = {
 
 export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
   const coverImage = getOptimizedImageUrl(item.coverImageUrl || item.coverImage, {
-    width: 900,
-    quality: 78,
-    resize: "cover",
+    width: 1200,
+    quality: 82,
+    resize: "contain",
   });
   const siteLine = getSiteLine(item);
   const areaLine = getAreaLine(item);
 
   return (
     <Link href={`/portfolio/${item.slug}`} className="block">
-      <figure className="relative aspect-[3/2] overflow-hidden">
+      <figure className="relative aspect-[3/2] overflow-hidden bg-white">
         <Image
           src={coverImage}
           alt={item.title}
           fill
           priority={priority}
-          sizes="(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 46vw, 100vw"
-          className="object-cover"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="object-contain lg:object-cover"
         />
       </figure>
       <div className="mt-3 grid gap-1.5 leading-tight">
