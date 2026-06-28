@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 
 import { getAreaLine, getProjectTitleLine, getSiteLine } from "@/lib/portfolio-display";
 import { getOptimizedImageUrl } from "@/lib/image-utils";
@@ -11,25 +14,42 @@ type PortfolioCardProps = {
 };
 
 export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
-  const coverImage = getOptimizedImageUrl(item.coverImageUrl || item.coverImage, {
-    width: 1200,
-    quality: 82,
-    resize: "contain",
-  });
+  const originalCoverImage = item.coverImageUrl || item.coverImage;
+  const optimizedCoverImage = useMemo(
+    () =>
+      getOptimizedImageUrl(originalCoverImage, {
+        width: 1200,
+        quality: 82,
+        resize: "cover",
+      }),
+    [originalCoverImage],
+  );
+  const [imageSrc, setImageSrc] = useState(optimizedCoverImage);
+  const [showImage, setShowImage] = useState(Boolean(optimizedCoverImage));
   const siteLine = getSiteLine(item);
   const areaLine = getAreaLine(item);
 
   return (
     <Link href={`/portfolio/${item.slug}`} className="block">
-      <figure className="relative aspect-[3/2] overflow-hidden bg-white">
-        <Image
-          src={coverImage}
-          alt={item.title}
-          fill
-          priority={priority}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-contain lg:object-cover"
-        />
+      <figure className="relative aspect-[4/3] w-full overflow-hidden bg-[#f5f5f5]">
+        {showImage ? (
+          <Image
+            src={imageSrc}
+            alt=""
+            fill
+            priority={priority}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover object-center"
+            onError={() => {
+              if (imageSrc !== originalCoverImage && originalCoverImage) {
+                setImageSrc(originalCoverImage);
+                return;
+              }
+
+              setShowImage(false);
+            }}
+          />
+        ) : null}
       </figure>
       <div className="mt-3 grid gap-1.5 leading-tight">
         <h2 className="text-[13px] font-normal uppercase tracking-[0.02em] text-foreground">
