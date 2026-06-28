@@ -8,6 +8,8 @@ import { getAreaLine, getProjectTitleLine, getSiteLine } from "@/lib/portfolio-d
 import { getOptimizedImageUrl } from "@/lib/image-utils";
 import type { PortfolioItem } from "@/lib/types";
 
+type ImageOrientation = "landscape" | "portrait" | "unknown";
+
 type PortfolioCardProps = {
   item: PortfolioItem;
   priority?: boolean;
@@ -20,14 +22,17 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
       getOptimizedImageUrl(originalCoverImage, {
         width: 1200,
         quality: 82,
-        resize: "cover",
+        resize: "contain",
       }),
     [originalCoverImage],
   );
   const [imageSrc, setImageSrc] = useState(optimizedCoverImage);
   const [showImage, setShowImage] = useState(Boolean(optimizedCoverImage));
+  const [orientation, setOrientation] = useState<ImageOrientation>("unknown");
   const siteLine = getSiteLine(item);
   const areaLine = getAreaLine(item);
+  const imageFitClass =
+    orientation === "portrait" ? "object-cover" : "object-contain";
 
   return (
     <Link href={`/portfolio/${item.slug}`} className="block">
@@ -39,9 +44,18 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
             fill
             priority={priority}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover object-center"
+            className={`${imageFitClass} object-center`}
+            onLoad={(event) => {
+              const image = event.currentTarget;
+              setOrientation(
+                image.naturalHeight > image.naturalWidth
+                  ? "portrait"
+                  : "landscape",
+              );
+            }}
             onError={() => {
               if (imageSrc !== originalCoverImage && originalCoverImage) {
+                setOrientation("unknown");
                 setImageSrc(originalCoverImage);
                 return;
               }
