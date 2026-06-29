@@ -34,6 +34,7 @@ export const PROJECT_LIST_SELECT_COLUMNS = `
   title,
   slug,
   category,
+  subtitle,
   location,
   area,
   cover_image_url,
@@ -366,19 +367,19 @@ async function getPortfolioBySlugUncached(slug: string) {
 
 const getCachedPublishedPortfolios = unstable_cache(
   getPublishedPortfoliosUncached,
-  ["published-portfolios"],
+  ["published-portfolios-v2"],
   { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS },
 );
 
 const getCachedFeaturedPortfolios = unstable_cache(
   getFeaturedPortfoliosUncached,
-  ["featured-portfolios"],
+  ["featured-portfolios-v2"],
   { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS },
 );
 
 const getCachedPortfoliosByCategory = unstable_cache(
   getPortfoliosByCategoryUncached,
-  ["portfolios-by-category"],
+  ["portfolios-by-category-v2"],
   { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS },
 );
 

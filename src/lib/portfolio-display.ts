@@ -17,16 +17,12 @@ export function getEnglishProjectName(item: PortfolioDisplayItem) {
     return subtitle.toUpperCase();
   }
 
-  return item.slug
-    .split("-")
-    .filter(Boolean)
-    .join(" ")
-    .toUpperCase();
+  return "";
 }
 
 export function getProjectTitleLine(item: PortfolioDisplayItem) {
   const englishTitle = getEnglishProjectName(item);
-  return englishTitle === item.title ? item.title : `${englishTitle} / ${item.title}`;
+  return englishTitle && englishTitle !== item.title ? `${englishTitle} / ${item.title}` : item.title;
 }
 
 export function getSiteLine(item: PortfolioDisplayItem) {
