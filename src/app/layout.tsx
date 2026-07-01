@@ -7,7 +7,7 @@ import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
 const siteUrl = "https://howdesign.vercel.app";
-const socialPreviewImage = `${siteUrl}/og-logo-preview.png`;
+const socialPreviewImage = `${siteUrl}/og-logo-preview.png?v=20260701`;
 const siteDescription = "주식회사 하우디자인 인테리어 포트폴리오 홈페이지";
 
 export const metadata: Metadata = {
@@ -25,8 +25,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: socialPreviewImage,
-        width: 1200,
-        height: 630,
+        width: 698,
+        height: 388,
         alt: siteConfig.brandName,
       },
     ],
