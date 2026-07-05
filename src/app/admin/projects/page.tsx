@@ -21,7 +21,7 @@ export default async function AdminProjectsPage() {
 
   if (isAuthed) {
     if (!supabaseClient || !hasSupabaseConfig) {
-      errorMessage = "Supabase 환경변수가 설정되어 있지 않습니다.";
+      errorMessage = "Supabase environment variables are not configured.";
     } else {
       const { data, error } = await supabaseClient
         .from("portfolio_projects")
@@ -40,16 +40,16 @@ export default async function AdminProjectsPage() {
   }
 
   return (
-    <div className="px-5 pb-16 pt-8 sm:px-10 sm:pt-12 lg:px-12">
+    <div className="px-5 pb-20 pt-9 sm:px-10 sm:pt-12 lg:px-12">
       <main className="mx-auto grid max-w-[1760px] gap-10">
         <header className="grid gap-5 sm:grid-cols-[1fr_auto] sm:items-start">
           <div className="grid gap-3">
-            <p className="text-[11px] uppercase tracking-[0.09em] text-muted">Admin</p>
-            <h1 className="text-[18px] font-normal">{isAuthed ? "프로젝트 관리" : "관리자 로그인"}</h1>
+            <p className="text-[11px] uppercase tracking-[0.16em] text-muted">Admin</p>
+            <h1 className="text-[22px] font-normal tracking-[0.02em]">{isAuthed ? "Project Management" : "Admin Login"}</h1>
             <p className="max-w-2xl text-[13px] leading-6 text-muted">
               {isAuthed
-                ? "기존 포트폴리오의 공개 상태, 대표 노출, 이미지와 내용을 관리합니다."
-                : "프로젝트 관리 화면을 사용하려면 관리자 비밀번호를 입력해주세요."}
+                ? "Manage portfolio visibility, featured status, image order, and project content."
+                : "Enter the administrator password to manage portfolio projects."}
             </p>
           </div>
           {isAuthed ? <AdminNav /> : null}

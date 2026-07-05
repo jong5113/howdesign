@@ -31,7 +31,7 @@ function getLogoSrc() {
 
 export function BrandMark({
   className = "",
-  imageClassName = "h-auto w-[180px] object-contain sm:w-[240px]",
+  imageClassName = "h-auto w-[165px] object-contain sm:w-[215px] lg:w-[235px]",
   textClassName = "text-[18px] font-normal tracking-[0.08em] sm:text-[22px]",
   priority = false,
   fallbackText = "주식회사 하우디자인",

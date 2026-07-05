@@ -117,7 +117,7 @@ export function ProjectLightboxGallery({
     <>
       <section className={className}>
         {visibleImages.map((image, index) => (
-          <figure key={`${image.src}-${index}`} className="mb-1.5 break-inside-avoid">
+          <figure key={`${image.src}-${index}`} className="mb-2 break-inside-avoid">
             <button
               type="button"
               className="block w-full cursor-pointer border-0 bg-transparent p-0 text-left"
@@ -152,7 +152,7 @@ export function ProjectLightboxGallery({
 
       {activeImage ? (
         <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/95 px-4 py-6"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/96 px-4 py-6"
           onClick={handleOverlayClick}
           role="dialog"
           aria-modal="true"
@@ -160,18 +160,18 @@ export function ProjectLightboxGallery({
         >
           <button
             type="button"
-            className="fixed right-4 top-4 z-50 flex h-12 w-12 cursor-pointer items-center justify-center border-0 bg-transparent text-[32px] font-light leading-none text-neutral-900 transition-opacity hover:opacity-50 sm:right-6 sm:top-6 sm:h-14 sm:w-14 sm:text-[40px]"
+            className="fixed right-4 top-4 z-50 flex h-12 w-12 cursor-pointer items-center justify-center border-0 bg-transparent text-[22px] font-light leading-none text-neutral-900 transition-opacity hover:opacity-50 sm:right-6 sm:top-6 sm:h-14 sm:w-14 sm:text-[26px]"
             onClick={closeLightbox}
             aria-label="Close image viewer"
           >
-            ×
+            X
           </button>
 
           <div className="flex max-w-full items-center justify-center gap-2 sm:gap-4 lg:gap-6">
             {hasMultipleImages ? (
               <button
                 type="button"
-                className="flex h-16 w-12 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent text-[36px] font-light leading-none text-neutral-900 transition-opacity hover:opacity-50 sm:h-20 sm:w-16 sm:text-[48px] lg:h-24 lg:w-20 lg:text-[64px]"
+                className="flex h-16 w-12 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent text-[34px] font-light leading-none text-neutral-900 transition-opacity hover:opacity-50 sm:h-20 sm:w-16 sm:text-[44px] lg:h-24 lg:w-20 lg:text-[58px]"
                 onClick={showPrevious}
                 aria-label="Show previous image"
               >
@@ -197,7 +197,7 @@ export function ProjectLightboxGallery({
             {hasMultipleImages ? (
               <button
                 type="button"
-                className="flex h-16 w-12 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent text-[36px] font-light leading-none text-neutral-900 transition-opacity hover:opacity-50 sm:h-20 sm:w-16 sm:text-[48px] lg:h-24 lg:w-20 lg:text-[64px]"
+                className="flex h-16 w-12 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent text-[34px] font-light leading-none text-neutral-900 transition-opacity hover:opacity-50 sm:h-20 sm:w-16 sm:text-[44px] lg:h-24 lg:w-20 lg:text-[58px]"
                 onClick={showNext}
                 aria-label="Show next image"
               >

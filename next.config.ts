@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
       {
         pathname: "/logo.svg",
       },
+      {
+        pathname: "/contact-hero.png",
+      },
     ],
     remotePatterns: [
       {

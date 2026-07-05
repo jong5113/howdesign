@@ -37,10 +37,10 @@ export default async function PortfolioDetailPage({ params }: PortfolioDetailPag
     .filter((image, index, images) => images.indexOf(image) === index);
 
   return (
-    <div className="px-5 pb-16 pt-10 sm:px-6 sm:pt-12 lg:px-6 lg:pt-14">
-      <article className="mx-auto grid max-w-[1760px] gap-10 lg:grid-cols-[280px_1fr] lg:gap-12 xl:grid-cols-[320px_1fr]">
-        <aside className="grid content-start gap-12 text-[12px] leading-6 text-muted lg:sticky lg:top-44 lg:self-start">
-          <nav className="grid gap-1.5 text-[11px] uppercase tracking-[0.1em]" aria-label="상세 페이지 메뉴">
+    <div className="px-5 pb-20 pt-10 sm:px-6 sm:pt-12 lg:px-8 lg:pt-14">
+      <article className="mx-auto grid max-w-[1760px] gap-11 lg:grid-cols-[300px_1fr] lg:gap-14 xl:grid-cols-[340px_1fr]">
+        <aside className="grid content-start gap-12 text-[12px] leading-6 text-muted lg:sticky lg:top-10 lg:self-start">
+          <nav className="grid gap-2 text-[11px] uppercase tracking-[0.14em]" aria-label="Project navigation">
             <Link href="/portfolio" className="w-fit text-foreground underline-offset-4 hover:underline">
               All
             </Link>
@@ -55,11 +55,11 @@ export default async function PortfolioDetailPage({ params }: PortfolioDetailPag
             </Link>
           </nav>
 
-          <section className="grid gap-5">
+          <section className="grid gap-6 border-t border-line pt-8">
             {detailRows.map((row) => (
-              <div key={row.label} className="grid gap-1.5">
-                <p className="text-[10px] uppercase tracking-[0.1em] text-muted">{row.label}</p>
-                <p className="text-[12px] leading-6 text-foreground">{row.value}</p>
+              <div key={row.label} className="grid gap-2">
+                <p className="text-[10px] uppercase tracking-[0.16em] text-muted">{row.label}</p>
+                <p className="text-[13px] leading-7 text-foreground">{row.value}</p>
               </div>
             ))}
           </section>
@@ -69,9 +69,9 @@ export default async function PortfolioDetailPage({ params }: PortfolioDetailPag
         <ProjectLightboxGallery
           images={galleryImages.map((image, index) => ({
             src: image,
-            alt: `${portfolio.title} 이미지 ${index + 1}`,
+            alt: `${portfolio.title} image ${index + 1}`,
           }))}
-          className="columns-1 gap-1.5 sm:columns-2 lg:columns-3"
+          className="columns-1 gap-2 sm:columns-2 lg:columns-3"
         />
       </article>
     </div>

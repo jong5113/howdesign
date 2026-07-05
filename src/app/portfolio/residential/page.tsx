@@ -12,7 +12,7 @@ export default async function ResidentialPortfolioPage() {
   const portfolios = await getPortfoliosByCategory("residential");
 
   return (
-    <div className="px-5 pb-16 pt-8 sm:px-10 sm:pt-12 lg:px-12">
+    <div className="px-5 pb-20 pt-9 sm:px-10 sm:pt-12 lg:px-12">
       <div className="mx-auto max-w-[1440px]">
         <PortfolioFilter active="residential" />
         <PortfolioGrid items={portfolios} />

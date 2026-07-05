@@ -3,7 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #111111;
-  --muted: #767676;
+  --muted: #6f6f6f;
   --line: #e5e5e5;
 }
 
@@ -21,6 +21,7 @@
 
 html {
   background: var(--background);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -28,6 +29,10 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+  line-height: 1.5;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 a {
@@ -35,11 +40,29 @@ a {
   text-decoration: none;
 }
 
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 1px solid var(--foreground);
+  outline-offset: 4px;
+}
+
 button,
 input,
 select,
 textarea {
   font: inherit;
+}
+
+img {
+  max-width: 100%;
 }
 
 ::selection {

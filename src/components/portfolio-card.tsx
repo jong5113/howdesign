@@ -52,8 +52,8 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
   const verticalFocus = getVerticalFocus(coverObjectPosition);
 
   return (
-    <Link href={`/portfolio/${item.slug}`} className="block">
-      <figure className="relative aspect-[3/2] w-full overflow-hidden bg-[#f5f5f5]">
+    <Link href={`/portfolio/${item.slug}`} className="group block">
+      <figure className="relative aspect-[3/2] w-full overflow-hidden bg-[#f6f6f4]">
         {showImage ? (
           <Image
             src={imageSrc}
@@ -62,7 +62,7 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
             height={900}
             priority={priority}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="absolute left-0 h-auto w-full max-w-none"
+            className="absolute left-0 h-auto w-full max-w-none transition-transform duration-500 ease-out group-hover:scale-[1.015]"
             style={{
               top: verticalFocus,
               transform: `translateY(-${verticalFocus})`,
@@ -78,12 +78,12 @@ export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
           />
         ) : null}
       </figure>
-      <div className="mt-3 grid gap-1.5 leading-tight">
-        <h2 className="text-[13px] font-normal uppercase tracking-[0.02em] text-foreground">
+      <div className="mt-3.5 grid gap-1.5 leading-tight">
+        <h2 className="text-[12px] font-normal uppercase tracking-[0.025em] text-foreground sm:text-[13px]">
           {getProjectTitleLine(item)}
         </h2>
-        {siteLine ? <p className="text-[12px] text-muted">{siteLine}</p> : null}
-        {areaLine ? <p className="text-[12px] text-muted">{areaLine}</p> : null}
+        {siteLine ? <p className="text-[12px] leading-5 text-muted">{siteLine}</p> : null}
+        {areaLine ? <p className="text-[12px] leading-5 text-muted">{areaLine}</p> : null}
       </div>
     </Link>
   );
