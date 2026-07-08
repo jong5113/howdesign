@@ -20,6 +20,9 @@ export function ProjectLightboxGallery({
   className = "",
 }: ProjectLightboxGalleryProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [originalImageUrls, setOriginalImageUrls] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [brokenImageUrls, setBrokenImageUrls] = useState<Set<string>>(
     () => new Set(),
   );
@@ -109,6 +112,58 @@ export function ProjectLightboxGallery({
     }
   };
 
+  const markImageForOriginalUrl = useCallback((src: string) => {
+    setOriginalImageUrls((currentUrls) => {
+      const nextUrls = new Set(currentUrls);
+      nextUrls.add(src);
+      return nextUrls;
+    });
+  }, []);
+
+  const markImageAsBroken = useCallback((src: string) => {
+    setBrokenImageUrls((currentUrls) => {
+      const nextUrls = new Set(currentUrls);
+      nextUrls.add(src);
+      return nextUrls;
+    });
+  }, []);
+
+  const handleImageError = useCallback(
+    (src: string) => {
+      if (!originalImageUrls.has(src)) {
+        markImageForOriginalUrl(src);
+        return;
+      }
+
+      markImageAsBroken(src);
+    },
+    [markImageAsBroken, markImageForOriginalUrl, originalImageUrls],
+  );
+
+  const getGalleryImageSrc = useCallback(
+    (src: string) =>
+      originalImageUrls.has(src)
+        ? src
+        : getOptimizedImageUrl(src, {
+            width: 1400,
+            quality: 82,
+            resize: "contain",
+          }),
+    [originalImageUrls],
+  );
+
+  const getLightboxImageSrc = useCallback(
+    (src: string) =>
+      originalImageUrls.has(src)
+        ? src
+        : getOptimizedImageUrl(src, {
+            width: 2000,
+            quality: 85,
+            resize: "contain",
+          }),
+    [originalImageUrls],
+  );
+
   if (visibleImages.length === 0) {
     return null;
   }
@@ -125,11 +180,7 @@ export function ProjectLightboxGallery({
               aria-label={`Open image ${index + 1}`}
             >
               <Image
-                src={getOptimizedImageUrl(image.src, {
-                  width: 1400,
-                  quality: 82,
-                  resize: "contain",
-                })}
+                src={getGalleryImageSrc(image.src)}
                 alt={image.alt ?? ""}
                 width={1400}
                 height={933}
@@ -137,13 +188,8 @@ export function ProjectLightboxGallery({
                 className="block h-auto w-full"
                 priority={index === 0}
                 decoding="async"
-                onError={() => {
-                  setBrokenImageUrls((currentUrls) => {
-                    const nextUrls = new Set(currentUrls);
-                    nextUrls.add(image.src);
-                    return nextUrls;
-                  });
-                }}
+                unoptimized={originalImageUrls.has(image.src)}
+                onError={() => handleImageError(image.src)}
               />
             </button>
           </figure>
@@ -180,11 +226,7 @@ export function ProjectLightboxGallery({
             ) : null}
 
             <Image
-              src={getOptimizedImageUrl(activeImage.src, {
-                width: 2000,
-                quality: 85,
-                resize: "contain",
-              })}
+              src={getLightboxImageSrc(activeImage.src)}
               alt={activeImage.alt ?? ""}
               width={2000}
               height={1333}
@@ -192,6 +234,8 @@ export function ProjectLightboxGallery({
               className="max-h-[85vh] max-w-[78vw] object-contain sm:max-w-[84vw] lg:max-w-[86vw]"
               loading="eager"
               decoding="async"
+              unoptimized={originalImageUrls.has(activeImage.src)}
+              onError={() => handleImageError(activeImage.src)}
             />
 
             {hasMultipleImages ? (
