@@ -1,6 +1,9 @@
+export type DesignPreviewSlug = "concept-2" | "concept-4";
+export type DesignPreviewPageKind = "home" | "project" | "contact";
+
 export type DesignPreviewConcept = {
-  slug: `concept-${1 | 2 | 3 | 4 | 5}`;
-  number: string;
+  slug: DesignPreviewSlug;
+  number: "02" | "04";
   name: string;
   description: string;
   benchmark: string;
@@ -8,47 +11,53 @@ export type DesignPreviewConcept = {
 
 export const designPreviewConcepts: DesignPreviewConcept[] = [
   {
-    slug: "concept-1",
-    number: "01",
-    name: "Light Editorial Luxury",
-    description:
-      "아이보리 여백과 세리프 타이포, 큰 이미지가 어우러지는 부드러운 프리미엄 에디토리얼 방향",
-    benchmark: "Yabu Pushelberg · premium residential editorial",
-  },
-  {
     slug: "concept-2",
     number: "02",
     name: "Dark Luxury Editorial Portfolio",
     description:
-      "차콜 배경과 시네마틱 이미지로 첫인상을 강화한 호텔·레스토랑·상업공간 중심의 다크 포트폴리오",
-    benchmark: "Awwwards dark editorial · boutique hospitality",
-  },
-  {
-    slug: "concept-3",
-    number: "03",
-    name: "Warm Minimal Studio",
-    description:
-      "재료의 온도와 조용한 여백을 강조해 오래 보아도 편안한 주거·스튜디오 중심의 미니멀 방향",
-    benchmark: "Norm Architects · warm Scandinavian minimalism",
+      "강한 첫인상과 프리미엄 상업공간 포트폴리오에 적합한 다크 에디토리얼 방향",
+    benchmark: "Dark editorial · boutique hospitality",
   },
   {
     slug: "concept-4",
     number: "04",
     name: "Structured Architecture Grid",
     description:
-      "얇은 선과 명확한 정보 체계로 설계 전문성과 신뢰감을 전달하는 건축 스튜디오형 그리드",
-    benchmark: "International architecture office · Swiss grid",
-  },
-  {
-    slug: "concept-5",
-    number: "05",
-    name: "Cinematic Boutique Portfolio",
-    description:
-      "풀 스크린 프로젝트 이미지와 절제된 오버레이로 브랜드의 감도와 시각적 임팩트를 극대화한 방향",
-    benchmark: "Studio KO · cinematic boutique portfolio",
+      "명확한 정보 구조와 전문성을 강조하는 밝은 아키텍처 스튜디오 방향",
+    benchmark: "Architecture office · structured Swiss grid",
   },
 ];
 
+export const designPreviewPageCopy: Record<
+  DesignPreviewPageKind,
+  { label: string; title: string; description: string }
+> = {
+  home: {
+    label: "HOME PREVIEW",
+    title: "Home",
+    description: "브랜드 첫인상과 주요 프로젝트를 보여주는 홈 화면입니다.",
+  },
+  project: {
+    label: "PROJECT DETAIL PREVIEW",
+    title: "Project Detail",
+    description: "실제 프로젝트 정보와 상세 이미지를 적용한 현장 상세 화면입니다.",
+  },
+  contact: {
+    label: "CONTACT PREVIEW",
+    title: "Contact",
+    description: "문의에 필요한 회사 정보를 각 콘셉트의 언어로 정리한 화면입니다.",
+  },
+};
+
 export function getDesignPreviewConcept(slug: string) {
   return designPreviewConcepts.find((concept) => concept.slug === slug);
+}
+
+export function getDesignPreviewPagePath(
+  conceptSlug: DesignPreviewSlug,
+  pageKind: DesignPreviewPageKind,
+) {
+  return pageKind === "home"
+    ? `/design-preview/${conceptSlug}`
+    : `/design-preview/${conceptSlug}/${pageKind}`;
 }

@@ -1,38 +1,103 @@
 import Link from "next/link";
 
 import { ConceptScene } from "@/components/design-preview/concept-scenes";
-import { designPreviewConcepts, type DesignPreviewConcept } from "@/lib/design-preview";
+import {
+  ConceptContactScene,
+  ConceptProjectScene,
+} from "@/components/design-preview/concept-subpage-scenes";
+import {
+  designPreviewConcepts,
+  designPreviewPageCopy,
+  getDesignPreviewPagePath,
+  type DesignPreviewConcept,
+  type DesignPreviewPageKind,
+} from "@/lib/design-preview";
 import type { PortfolioItem } from "@/lib/types";
 
 type ConceptPreviewPageProps = {
   concept: DesignPreviewConcept;
+  pageKind?: DesignPreviewPageKind;
   projects: PortfolioItem[];
+  project?: PortfolioItem;
+  nextProject?: PortfolioItem;
 };
 
-export function ConceptPreviewPage({ concept, projects }: ConceptPreviewPageProps) {
-  const currentIndex = designPreviewConcepts.findIndex((item) => item.slug === concept.slug);
-  const previous = designPreviewConcepts[(currentIndex - 1 + designPreviewConcepts.length) % designPreviewConcepts.length];
-  const next = designPreviewConcepts[(currentIndex + 1) % designPreviewConcepts.length];
+function PreviewScene({
+  concept,
+  pageKind,
+  mode,
+  projects,
+  project,
+  nextProject,
+}: Required<Pick<ConceptPreviewPageProps, "concept" | "pageKind" | "projects">> & {
+  mode: "desktop" | "mobile";
+  project?: PortfolioItem;
+  nextProject?: PortfolioItem;
+}) {
+  if (pageKind === "project") {
+    return (
+      <ConceptProjectScene
+        conceptSlug={concept.slug}
+        mode={mode}
+        projects={projects}
+        project={project}
+        nextProject={nextProject}
+      />
+    );
+  }
+
+  if (pageKind === "contact") {
+    return (
+      <ConceptContactScene
+        conceptSlug={concept.slug}
+        mode={mode}
+        projects={projects}
+      />
+    );
+  }
+
+  return (
+    <ConceptScene
+      conceptSlug={concept.slug}
+      mode={mode}
+      projects={projects}
+    />
+  );
+}
+
+export function ConceptPreviewPage({
+  concept,
+  pageKind = "home",
+  projects,
+  project,
+  nextProject,
+}: ConceptPreviewPageProps) {
+  const pageCopy = designPreviewPageCopy[pageKind];
+  const otherConcept =
+    designPreviewConcepts.find((item) => item.slug !== concept.slug) || concept;
+  const otherConceptPath = getDesignPreviewPagePath(otherConcept.slug, pageKind);
 
   return (
     <div className="dp-detail">
-      <nav className="dp-detail__topbar" aria-label="시안 이동">
+      <nav className="dp-detail__topbar" aria-label="디자인 시안 이동">
         <Link href="/design-preview">ALL CONCEPTS</Link>
-        <div>
-          <Link href={`/design-preview/${previous.slug}`} aria-label={`이전 시안: ${previous.name}`}>
-            PREV
-          </Link>
-          <span>{concept.number} / 05</span>
-          <Link href={`/design-preview/${next.slug}`} aria-label={`다음 시안: ${next.name}`}>
-            NEXT
-          </Link>
+        <div className="dp-detail__page-links">
+          <Link href={`/design-preview/${concept.slug}`}>HOME</Link>
+          <Link href={`/design-preview/${concept.slug}/project`}>PROJECT DETAIL</Link>
+          <Link href={`/design-preview/${concept.slug}/contact`}>CONTACT</Link>
         </div>
+        <span>{concept.number} / SELECTED</span>
       </nav>
 
       <header className="dp-detail__intro">
-        <span>CONCEPT {concept.number}</span>
-        <h1>{concept.name}</h1>
-        <p>“{concept.description}”</p>
+        <span>
+          CONCEPT {concept.number} / {pageCopy.label}
+        </span>
+        <h1>
+          {concept.name}
+          <small>{pageCopy.title}</small>
+        </h1>
+        <p>{pageCopy.description}</p>
         <small>REFERENCE MOOD · {concept.benchmark}</small>
       </header>
 
@@ -45,33 +110,50 @@ export function ConceptPreviewPage({ concept, projects }: ConceptPreviewPageProp
           <p>프레임 안에서 세로로 스크롤해 전체 구성을 확인할 수 있습니다.</p>
         </div>
         <div className="dp-preview-window dp-preview-window--desktop">
-          <ConceptScene conceptSlug={concept.slug} mode="desktop" projects={projects} />
+          <PreviewScene
+            concept={concept}
+            pageKind={pageKind}
+            mode="desktop"
+            projects={projects}
+            project={project}
+            nextProject={nextProject}
+          />
         </div>
       </section>
 
-      <section id="mobile-preview" className="dp-preview-section dp-preview-section--mobile">
+      <section
+        id="mobile-preview"
+        className="dp-preview-section dp-preview-section--mobile"
+      >
         <div className="dp-preview-section__heading">
           <div>
             <span>MOBILE PREVIEW</span>
             <h2>390px layout</h2>
           </div>
-          <p>실제 모바일 흐름처럼 프레임 내부를 세로로 스크롤할 수 있습니다.</p>
+          <p>실제 모바일 화면처럼 프레임 내부를 세로로 스크롤할 수 있습니다.</p>
         </div>
         <div className="dp-mobile-stage">
           <div className="dp-preview-window dp-preview-window--mobile">
-            <ConceptScene conceptSlug={concept.slug} mode="mobile" projects={projects} />
+            <PreviewScene
+              concept={concept}
+              pageKind={pageKind}
+              mode="mobile"
+              projects={projects}
+              project={project}
+              nextProject={nextProject}
+            />
           </div>
         </div>
       </section>
 
-      <nav className="dp-detail__bottom-nav" aria-label="다른 시안 보기">
-        <Link href={`/design-preview/${previous.slug}`}>
-          <span>PREVIOUS</span>
-          <strong>{previous.name}</strong>
+      <nav className="dp-detail__bottom-nav" aria-label="다른 시안과 비교">
+        <Link href="/design-preview">
+          <span>PREVIEW LIST</span>
+          <strong>Selected concepts</strong>
         </Link>
-        <Link href={`/design-preview/${next.slug}`}>
-          <span>NEXT</span>
-          <strong>{next.name}</strong>
+        <Link href={otherConceptPath}>
+          <span>COMPARE THIS PAGE</span>
+          <strong>{otherConcept.name}</strong>
         </Link>
       </nav>
     </div>

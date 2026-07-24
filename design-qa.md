@@ -2,92 +2,108 @@
 
 ## Scope
 
-- Preview index: `/design-preview`
-- Concept routes: `/design-preview/concept-1` through `/design-preview/concept-5`
+- Comparison index: `/design-preview`
+- Concept 2: home, project detail, and contact previews
+- Concept 4: home, project detail, and contact previews
+- Removed routes: Concepts 1, 3, and 5
 - Operating regression routes: `/`, `/portfolio`, `/contact`, `/admin/projects`
-- State: live published Supabase portfolio data, top/hero state, unauthenticated admin state
 
 ## Source Visual Truth
 
-The five ideation boards are directional references rather than pixel-perfect clone targets:
+The selected home previews are the visual source for extending each design
+language to project detail and contact:
 
-1. Light Editorial Luxury:
-   `C:/Users/User/.codex/generated_images/019f0db6-deef-76b0-b539-8d740be66ce2/call_pxSRwewNAQtIpiTWnxTRxE3e.png`
-2. Dark Luxury Editorial Portfolio:
-   `C:/Users/User/.codex/generated_images/019f0db6-deef-76b0-b539-8d740be66ce2/call_PUuNxl7WX200b9ERyrz8hwys.png`
-3. Warm Minimal Studio:
-   `C:/Users/User/.codex/generated_images/019f0db6-deef-76b0-b539-8d740be66ce2/call_lCShp4IBKqjoNXRTLTtXFAbR.png`
-4. Structured Architecture Grid:
-   `C:/Users/User/.codex/generated_images/019f0db6-deef-76b0-b539-8d740be66ce2/call_0tVkySjPvZs4dqn6Slo1NEz5.png`
-5. Cinematic Boutique Portfolio:
-   `C:/Users/User/.codex/generated_images/019f0db6-deef-76b0-b539-8d740be66ce2/call_0T4FMmwSrehhODt5qGEEQtjH.png`
-
-Source dimensions are 1672x941 for Concepts 1-2 and approximately
-1490x1060 for Concepts 3-5, all at 72 dpi.
+- Concept 2 desktop: `design-qa-assets/concept-2-desktop-final.png`
+- Concept 2 mobile: `design-qa-assets/concept-2-mobile-final.png`
+- Concept 4 desktop: `design-qa-assets/concept-4-desktop-final.png`
+- Concept 4 mobile: `design-qa-assets/concept-4-mobile-final.png`
 
 ## Implementation Evidence
 
-- Desktop captures:
-  `design-qa-assets/concept-{1..5}-desktop-final.png`
-- Mobile captures:
-  `design-qa-assets/concept-{1..5}-mobile-final.png`
-- Side-by-side comparisons:
-  `design-qa-assets/compare-concept-{1..5}.jpg`
-- Preview index:
-  `design-qa-assets/design-preview-index-desktop.png`
-  and `design-qa-assets/design-preview-index-mobile.png`
-- Operating-page regression:
+- Concept 2 project:
+  `design-qa-assets/concept-2-project-desktop-selected.png`,
+  `design-qa-assets/concept-2-project-mobile-selected.png`,
+  and `design-qa-assets/concept-2-project-gallery-selected.png`
+- Concept 2 contact:
+  `design-qa-assets/concept-2-contact-desktop-selected.png` and
+  `design-qa-assets/concept-2-contact-mobile-selected.png`
+- Concept 4 project:
+  `design-qa-assets/concept-4-project-desktop-selected.png`,
+  `design-qa-assets/concept-4-project-mobile-selected.png`,
+  and `design-qa-assets/concept-4-project-gallery-selected.png`
+- Concept 4 contact:
+  `design-qa-assets/concept-4-contact-desktop-selected.png` and
+  `design-qa-assets/concept-4-contact-mobile-selected.png`
+- Updated index:
+  `design-qa-assets/design-preview-index-desktop.png` and
+  `design-qa-assets/design-preview-index-mobile.png`
+- Operating regression:
   `design-qa-assets/operating-home-mobile.png`
 
-Browser viewport was 1440x1024. The desktop preview content measured 1365px
-wide. The dedicated mobile frame measured 390px externally and 379px of
-scrollable client width. Captures are 1425x1013 at 72 dpi after browser
-chrome normalization. Each concept was checked at its full internal scroll
-height, not only at the first viewport.
+Side-by-side source and implementation comparisons:
 
-## Comparison Findings
+- `design-qa-assets/compare-concept-2-project-selected.jpg`
+- `design-qa-assets/compare-concept-2-contact-selected.jpg`
+- `design-qa-assets/compare-concept-4-project-selected.jpg`
+- `design-qa-assets/compare-concept-4-contact-selected.jpg`
 
-- Concept 1 preserves the reference's ivory editorial split, large serif
-  hierarchy, restrained metadata, and image-led selected work.
-- Concept 2 establishes a distinct charcoal cinematic hero and dark editorial
-  project sequence without borrowing the light concepts' layout.
-- Concept 3 carries the warm material palette into a calm side-rail studio
-  composition with spacious one-column mobile imagery.
-- Concept 4 uses an explicit architectural grid, thin rules, project numbers,
-  and a structured process section.
-- Concept 5 uses a full cinematic hero, centered serif headline, and large
-  immersive project scenes.
-- Header, hero, desktop frame, and exact 390px mobile frame were inspected as
-  focused regions. No additional crop-only evidence was needed because these
-  regions are legible in the final full-view captures.
+## Normalization
 
-## Fix History
+- Desktop browser viewport: 1440x1024 CSS px, device scale factor 1
+- Desktop captured pixels: 1425x1013 at 72 dpi after scrollbar normalization
+- Mobile browser viewport: 390x844 CSS px
+- Mobile captured pixels: 375x812 at 72 dpi after scrollbar normalization
+- Embedded mobile preview frame: 390px outer width, 379px scrollable client width
+- State: live published Supabase data, DAEDONG JANGU project detail, top and
+  gallery scroll states, unauthenticated admin state
 
-- P2 fixed: Concept 4 mobile project metadata inherited the large project
-  number size and caused 15px horizontal overflow. The title sizing was
-  isolated and long words now wrap safely.
-- P2 fixed: the transparent logo asset initially appeared as a white rectangle
-  on ivory and warm backgrounds. Preview-only blend handling now preserves the
-  supplied logo while removing the box effect.
-- P3 accepted: one known Supabase render transform can return 400 for the
-  Galleria cover. The preview image component retries the original Storage URL
-  and then uses a blank placeholder, so no broken icon or alt text is exposed.
+## Visual Comparison
+
+- Concept 2 retains the selected charcoal palette, warm beige navigation,
+  large serif headlines, uppercase metadata, cinematic imagery, and restrained
+  divider lines across home, project, and contact.
+- Concept 4 retains the selected ivory background, thin black rules, large
+  sans-serif typography, numbered information architecture, and explicit
+  project-data grid across all three pages.
+- Both project previews use the same Supabase project, making image treatment,
+  hierarchy, and metadata density directly comparable.
+- Full-view composition was checked through each preview frame's complete
+  internal scroll height.
+- Focused gallery captures were required because gallery rhythm and image
+  proportions were too small to judge from the first viewport alone.
+
+## Findings
+
+- No open P0, P1, or P2 visual differences remain.
+- Typography: display and metadata scales remain consistent with each selected
+  source direction on desktop and mobile.
+- Spacing: no outer-page or embedded-frame horizontal overflow was found.
+- Colors: Concept 2 and Concept 4 remain visually distinct and use the source
+  palette without introducing new decorative colors.
+- Image quality: real project covers and gallery images render with optimized
+  URLs, original-URL retry, and text-free failure placeholders.
+- Copy: project metadata and contact information are readable, correctly
+  wrapped, and preserve Korean/English hierarchy.
 
 ## Functional Checks
 
-- All five index cards open the matching concept route.
-- Desktop and mobile anchor controls land on the intended preview frames.
-- Mobile preview frames scroll independently.
-- Every concept renders live project names and cover images.
-- Broken-image count was zero after fallback handling.
-- Page and frame horizontal overflow was zero at desktop and mobile sizes.
-- `/`, `/portfolio`, and `/contact` retained the existing site header and
-  operating layouts.
-- `/admin/projects` retained the existing login surface.
-- Browser console showed no application errors during final local checks.
+- Seven retained preview routes return 200.
+- `/design-preview/concept-1`, `concept-3`, and `concept-5` return 404.
+- Preview navigation moves between home, project detail, contact, and the
+  comparison list.
+- Email and telephone links use `mailto:` and `tel:` correctly.
+- Desktop and mobile frames scroll independently.
+- Broken-image count was zero on every retained preview route.
+- `/`, `/portfolio`, `/contact`, and `/admin/projects` retain their existing
+  header, content, and login state.
+- Final browser-console check showed no application errors or warnings.
 
-## Result
+## Comparison History
 
-No open P0, P1, or P2 visual or functional issues remain.
+- The first selected-concept comparison found no actionable P0/P1/P2 visual
+  mismatch.
+- Unused Concept 1, 3, and 5 scene code, CSS, metadata, routes, and QA assets
+  were removed before the final comparison.
+- A preview-only unused prop warning was removed before final lint.
 
 final result: passed

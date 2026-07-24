@@ -20,14 +20,16 @@ const previewSerif = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   title: "Renewal Design Preview",
-  description: "HOW DESIGN 홈페이지 리뉴얼 시안 5종 비교 페이지",
+  description: "HOW DESIGN 리뉴얼 최종 후보 2종 비교 페이지",
   robots: {
     index: false,
     follow: false,
   },
 };
 
-export default function DesignPreviewLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default function DesignPreviewLayout({
+  children,
+}: Readonly<{ children: ReactNode }>) {
   return (
     <div className={`${previewSans.variable} ${previewSerif.variable} dp-root`}>
       {children}

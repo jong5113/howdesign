@@ -13,35 +13,44 @@ export function DesignPreviewIndex({ projects }: DesignPreviewIndexProps) {
     <div className="dp-index">
       <header className="dp-index__intro">
         <div>
-          <p>HOW DESIGN · RENEWAL STUDY</p>
-          <h1>Five directions for the next HOW DESIGN.</h1>
+          <p>HOW DESIGN · FINAL DIRECTION STUDY</p>
+          <h1>Two selected directions for the next HOW DESIGN.</h1>
         </div>
         <p>
-          운영 사이트와 분리된 디자인 검토용 페이지입니다. 실제 프로젝트 이미지와 정보를 사용해
-          서로 다른 다섯 가지 방향을 PC와 모바일 화면으로 비교할 수 있습니다.
+          선택한 두 가지 리뉴얼 방향을 홈, 프로젝트 상세, CONTACT 화면까지
+          확장했습니다. 실제 포트폴리오 데이터로 PC와 모바일 구성을 비교할 수
+          있습니다.
         </p>
       </header>
 
       <div className="dp-index__guide">
-        <span>5 CONCEPTS</span>
+        <span>2 SELECTED CONCEPTS</span>
+        <span>3 PAGES EACH</span>
         <span>DESKTOP · 1440</span>
         <span>MOBILE · 390</span>
-        <span>LIVE PORTFOLIO DATA</span>
       </div>
 
-      <section className="dp-index__grid" aria-label="디자인 시안 목록">
+      <section className="dp-index__grid" aria-label="선택한 디자인 시안 목록">
         {designPreviewConcepts.map((concept, index) => {
-          const project = projects[index % Math.max(projects.length, 1)];
+          const imageIndex = concept.slug === "concept-2" ? 1 : 0;
+          const project =
+            projects[imageIndex % Math.max(projects.length, 1)] || projects[index];
 
           return (
-            <article key={concept.slug} className={`dp-index-card dp-index-card--${concept.slug}`}>
-              <Link href={`/design-preview/${concept.slug}`} className="dp-index-card__visual">
+            <article
+              key={concept.slug}
+              className={`dp-index-card dp-index-card--${concept.slug}`}
+            >
+              <Link
+                href={`/design-preview/${concept.slug}`}
+                className="dp-index-card__visual"
+              >
                 {project ? (
                   <PreviewImage
                     project={project}
                     className="dp-index-card__image"
                     sizes="(max-width: 760px) 100vw, 46vw"
-                    priority={index < 2}
+                    priority
                   />
                 ) : (
                   <span className="dp-index-card__placeholder" />
@@ -55,8 +64,13 @@ export function DesignPreviewIndex({ projects }: DesignPreviewIndexProps) {
                 <p>{concept.description}</p>
                 <span>{concept.benchmark}</span>
                 <div className="dp-index-card__actions">
-                  <Link href={`/design-preview/${concept.slug}#desktop-preview`}>PC 보기</Link>
-                  <Link href={`/design-preview/${concept.slug}#mobile-preview`}>모바일 보기</Link>
+                  <Link href={`/design-preview/${concept.slug}`}>HOME PREVIEW</Link>
+                  <Link href={`/design-preview/${concept.slug}/project`}>
+                    PROJECT DETAIL
+                  </Link>
+                  <Link href={`/design-preview/${concept.slug}/contact`}>
+                    CONTACT
+                  </Link>
                 </div>
               </div>
             </article>

@@ -8,20 +8,24 @@ import type { PortfolioItem } from "@/lib/types";
 
 type PreviewImageProps = {
   project: PortfolioItem;
+  src?: string;
   className?: string;
   imageClassName?: string;
+  objectPosition?: string;
   sizes: string;
   priority?: boolean;
 };
 
 export function PreviewImage({
   project,
+  src,
   className = "",
   imageClassName = "",
+  objectPosition,
   sizes,
   priority = false,
 }: PreviewImageProps) {
-  const originalImage = project.coverImageUrl || project.coverImage;
+  const originalImage = src || project.coverImageUrl || project.coverImage;
   const optimizedImage = useMemo(
     () =>
       getOptimizedImageUrl(originalImage, {
@@ -47,7 +51,12 @@ export function PreviewImage({
           fetchPriority={priority ? "high" : "auto"}
           sizes={sizes}
           className={`dp-image__media ${isLoaded ? "is-loaded" : ""} ${imageClassName}`}
-          style={{ objectPosition: project.coverObjectPosition || "center center" }}
+          style={{
+            objectPosition:
+              objectPosition ||
+              (src ? "center center" : project.coverObjectPosition) ||
+              "center center",
+          }}
           onLoad={() => setIsLoaded(true)}
           onError={() => {
             if (imageSrc !== originalImage && originalImage) {

@@ -6,6 +6,7 @@ import { designPreviewConcepts, getDesignPreviewConcept } from "@/lib/design-pre
 import { getPublishedPortfolios } from "@/lib/portfolio";
 
 export const revalidate = 600;
+export const dynamicParams = false;
 
 type DesignConceptPageProps = {
   params: Promise<{
@@ -38,5 +39,5 @@ export default async function DesignConceptPage({ params }: DesignConceptPagePro
 
   const projects = await getPublishedPortfolios();
 
-  return <ConceptPreviewPage concept={concept} projects={projects} />;
+  return <ConceptPreviewPage concept={concept} pageKind="home" projects={projects} />;
 }
