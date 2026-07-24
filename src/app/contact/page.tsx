@@ -31,7 +31,7 @@ const contactHeroImage = "/contact-hero.png";
 export default function ContactPage() {
   return (
     <div className="public-shell contact-page">
-      <header className="contact-heading site-container">
+      <header className="contact-heading site-container contact-layout">
         <div>
           <p className="architecture-label">Contact / HOW DESIGN</p>
           <h1>
@@ -46,7 +46,10 @@ export default function ContactPage() {
         </p>
       </header>
 
-      <section className="contact-information site-container" aria-label="Contact information">
+      <section
+        className="contact-information site-container contact-layout"
+        aria-label="Contact information"
+      >
         {contactItems.map((item, index) => (
           <div key={item.label} className="contact-information__row">
             <span>{String(index + 1).padStart(2, "0")}</span>
@@ -62,23 +65,25 @@ export default function ContactPage() {
         ))}
       </section>
 
-      <section className="contact-image">
-        <Image
-          src={contactHeroImage}
-          alt="HOW DESIGN interior"
-          width={1600}
-          height={900}
-          priority
-          sizes="100vw"
-          className="contact-image__media"
-        />
-        <div className="site-container contact-image__caption">
+      <section className="contact-image site-container contact-layout">
+        <div className="contact-image__visual">
+          <Image
+            src={contactHeroImage}
+            alt="HOW DESIGN interior"
+            width={1600}
+            height={900}
+            priority
+            sizes="(max-width: 639px) calc(100vw - 40px), (max-width: 1023px) calc(100vw - 64px), (max-width: 1279px) calc(100vw - 96px), 1184px"
+            className="contact-image__media"
+          />
+        </div>
+        <div className="contact-image__caption">
           <span>Office / Seoul</span>
           <span>Interior design &amp; construction</span>
         </div>
       </section>
 
-      <section className="contact-process site-container">
+      <section className="contact-process site-container contact-layout">
         <p className="architecture-label">Consultation</p>
         <div>
           <strong>01</strong>

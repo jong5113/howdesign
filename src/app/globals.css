@@ -666,6 +666,10 @@ img {
 
 /* Contact */
 
+.contact-layout {
+  max-width: 1280px;
+}
+
 .contact-heading {
   display: grid;
   grid-template-columns: 1.25fr 0.75fr;
@@ -739,11 +743,29 @@ img {
   border-bottom: 1px solid var(--strong-line);
 }
 
+.contact-image__visual {
+  position: relative;
+  aspect-ratio: 16 / 7;
+  overflow: hidden;
+  background: #e8e3d9;
+}
+
+.contact-image__visual::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(17, 15, 12, 0.14) 0%, transparent 18%),
+    linear-gradient(0deg, rgba(17, 15, 12, 0.2) 0%, transparent 22%),
+    linear-gradient(90deg, rgba(17, 15, 12, 0.12) 0%, transparent 15%),
+    linear-gradient(270deg, rgba(17, 15, 12, 0.12) 0%, transparent 15%);
+  content: "";
+  pointer-events: none;
+}
+
 .contact-image__media {
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 16 / 8.2;
+  height: 100%;
   object-fit: cover;
   object-position: center;
 }
@@ -1120,8 +1142,8 @@ img {
     overflow-wrap: anywhere;
   }
 
-  .contact-image__media {
-    aspect-ratio: 4 / 3;
+  .contact-image__visual {
+    aspect-ratio: 16 / 11;
   }
 
   .contact-image__caption {
