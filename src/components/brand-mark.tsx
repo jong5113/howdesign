@@ -13,8 +13,14 @@ type BrandMarkProps = {
 };
 
 function getLogoSrc() {
+  const transparentLogoPngPath = path.join(process.cwd(), "public", "logo-transparent.png");
   const logoSvgPath = path.join(process.cwd(), "public", "logo.svg");
   const logoPngPath = path.join(process.cwd(), "public", "logo.png");
+
+  if (fs.existsSync(transparentLogoPngPath)) {
+    const version = Math.round(fs.statSync(transparentLogoPngPath).mtimeMs);
+    return `/logo-transparent.png?v=${version}`;
+  }
 
   if (fs.existsSync(logoPngPath)) {
     const version = Math.round(fs.statSync(logoPngPath).mtimeMs);
@@ -44,8 +50,8 @@ export function BrandMark({
         <Image
           src={logoSrc}
           alt="주식회사 하우디자인"
-          width={320}
-          height={120}
+          width={1254}
+          height={588}
           priority={priority}
           className={imageClassName}
         />
