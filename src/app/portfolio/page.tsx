@@ -12,9 +12,12 @@ export default async function PortfolioPage() {
   const portfolios = await getPublishedPortfolios();
 
   return (
-    <div className="px-5 pb-20 pt-9 sm:px-10 sm:pt-12 lg:px-12">
-      <div className="mx-auto max-w-[1440px]">
-        <PortfolioFilter active="all" />
+    <div className="public-shell portfolio-page">
+      <div className="site-container">
+        <PortfolioFilter
+          active="all"
+          description="주거와 상업 공간의 조건을 해석해 완성한 HOW DESIGN의 프로젝트입니다."
+        />
         <PortfolioGrid items={portfolios} />
       </div>
     </div>

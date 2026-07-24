@@ -3,7 +3,7 @@ export const siteConfig = {
   brandName: "HOW DESIGN",
   email: "jong51133@nate.com",
   phone: "010-9551-5113",
-  address: "서울시 송파구 충민로 6, 가든파이브라이프 제2층 2007호",
+  address: "서울시 송파구 충민로66 가든파이브라이프 제지2층 2007호",
 };
 
 export const contactLinks = {

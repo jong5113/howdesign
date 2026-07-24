@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, MouseEvent, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
 import { getOptimizedImageUrl } from "@/lib/image-utils";
 
@@ -13,11 +13,13 @@ export type ProjectLightboxImage = {
 type ProjectLightboxGalleryProps = {
   images: ProjectLightboxImage[];
   className?: string;
+  afterFirst?: ReactNode;
 };
 
 export function ProjectLightboxGallery({
   images,
   className = "",
+  afterFirst,
 }: ProjectLightboxGalleryProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [originalImageUrls, setOriginalImageUrls] = useState<Set<string>>(
@@ -165,34 +167,38 @@ export function ProjectLightboxGallery({
   );
 
   if (visibleImages.length === 0) {
-    return null;
+    return <div className="project-gallery-empty" aria-hidden="true" />;
   }
 
   return (
     <>
       <section className={className}>
         {visibleImages.map((image, index) => (
-          <figure key={`${image.src}-${index}`} className="mb-2 break-inside-avoid">
-            <button
-              type="button"
-              className="block w-full cursor-pointer border-0 bg-transparent p-0 text-left"
-              onClick={() => openLightbox(index)}
-              aria-label={`Open image ${index + 1}`}
-            >
-              <Image
-                src={getGalleryImageSrc(image.src)}
-                alt={image.alt ?? ""}
-                width={1400}
-                height={933}
-                sizes="(min-width: 1024px) 31vw, (min-width: 640px) 48vw, 100vw"
-                className="block h-auto w-full"
-                priority={index === 0}
-                decoding="async"
-                unoptimized={originalImageUrls.has(image.src)}
-                onError={() => handleImageError(image.src)}
-              />
-            </button>
-          </figure>
+          <Fragment key={`${image.src}-${index}`}>
+            <figure className={`project-gallery-item project-gallery-item--${index + 1}`}>
+              <button
+                type="button"
+                className="block w-full cursor-pointer border-0 bg-transparent p-0 text-left"
+                onClick={() => openLightbox(index)}
+                aria-label={`Open image ${index + 1}`}
+              >
+                <Image
+                  src={getGalleryImageSrc(image.src)}
+                  alt={image.alt ?? ""}
+                  width={1400}
+                  height={933}
+                  sizes={index === 0 ? "100vw" : "(min-width: 1024px) 50vw, 100vw"}
+                  className="project-gallery-image block h-auto w-full"
+                  priority={index === 0}
+                  decoding="async"
+                  unoptimized={originalImageUrls.has(image.src)}
+                  onError={() => handleImageError(image.src)}
+                />
+              </button>
+              {index > 0 ? <figcaption>{String(index + 1).padStart(2, "0")} / INTERIOR VIEW</figcaption> : null}
+            </figure>
+            {index === 0 ? afterFirst : null}
+          </Fragment>
         ))}
       </section>
 

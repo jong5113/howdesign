@@ -11,10 +11,6 @@ export const metadata = {
 
 const contactItems = [
   {
-    label: "Company",
-    value: siteConfig.name,
-  },
-  {
     label: "Email",
     value: siteConfig.email,
     href: contactLinks.email,
@@ -34,51 +30,69 @@ const contactHeroImage = "/contact-hero.png";
 
 export default function ContactPage() {
   return (
-    <main className="px-5 pb-24 pt-10 sm:px-10 sm:pt-12 lg:px-12 lg:pt-14">
-      <div className="mx-auto grid max-w-[1180px] gap-11 sm:gap-12">
-        <header className="grid gap-5 sm:gap-6">
-          <h1 className="text-[32px] font-normal uppercase leading-none tracking-[0.08em] sm:text-[44px] lg:text-[54px]">
-            Contact
-          </h1>
-          <p className="max-w-2xl whitespace-pre-line text-[14px] leading-7 text-muted sm:text-[15px] sm:leading-8">
-            프로젝트 문의는 아래 연락처로 남겨주세요.
+    <div className="public-shell contact-page">
+      <header className="contact-heading site-container">
+        <div>
+          <p className="architecture-label">Contact / HOW DESIGN</p>
+          <h1>
+            Let&apos;s discuss
             <br />
-            공간의 목적과 일정에 맞춰 차분하게 안내드리겠습니다.
-          </p>
-        </header>
+            your space.
+          </h1>
+        </div>
+        <p>
+          프로젝트의 용도, 위치, 예상 일정과 함께 문의해 주세요.
+          검토 후 상담 가능한 일정을 안내해 드립니다.
+        </p>
+      </header>
 
-        <div className="h-px w-full bg-line" />
-
-        <section className="grid">
-          {contactItems.map((item) => (
-            <div key={item.label} className="grid gap-2 border-b border-line py-6 sm:grid-cols-[180px_1fr] sm:gap-8">
-              <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-muted">{item.label}</p>
-              {item.href ? (
-                <a href={item.href} className="w-fit text-[15px] leading-7 underline-offset-4 hover:underline sm:text-[16px]">
-                  {item.value}
-                </a>
-              ) : (
-                <p className="text-[15px] leading-7 sm:text-[16px]">{item.value}</p>
-              )}
-            </div>
-          ))}
-        </section>
-
-        {contactHeroImage ? (
-          <Image
-            src={contactHeroImage}
-            alt="HOW DESIGN interior"
-            width={1400}
-            height={860}
-            sizes="(max-width: 1024px) 100vw, 1180px"
-            className="h-[260px] w-full object-cover object-center sm:h-[360px] lg:h-[440px]"
-          />
-        ) : (
-          <div className="grid h-[260px] w-full place-items-center bg-[#f5f5f5] text-[12px] uppercase tracking-[0.12em] text-muted sm:h-[360px] lg:h-[440px]">
-            HOW DESIGN
+      <section className="contact-information site-container" aria-label="Contact information">
+        {contactItems.map((item, index) => (
+          <div key={item.label} className="contact-information__row">
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <p>{item.label}</p>
+            {item.href ? (
+              <a href={item.href}>
+                {item.value}
+              </a>
+            ) : (
+              <p>{item.value}</p>
+            )}
           </div>
-        )}
-      </div>
-    </main>
+        ))}
+      </section>
+
+      <section className="contact-image">
+        <Image
+          src={contactHeroImage}
+          alt="HOW DESIGN interior"
+          width={1600}
+          height={900}
+          priority
+          sizes="100vw"
+          className="contact-image__media"
+        />
+        <div className="site-container contact-image__caption">
+          <span>Office / Seoul</span>
+          <span>Interior design &amp; construction</span>
+        </div>
+      </section>
+
+      <section className="contact-process site-container">
+        <p className="architecture-label">Consultation</p>
+        <div>
+          <strong>01</strong>
+          <p>프로젝트 기본 정보 전달</p>
+        </div>
+        <div>
+          <strong>02</strong>
+          <p>검토 및 상담 일정 안내</p>
+        </div>
+        <div>
+          <strong>03</strong>
+          <p>현장 미팅과 설계 범위 협의</p>
+        </div>
+      </section>
+    </div>
   );
 }

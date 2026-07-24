@@ -3,17 +3,18 @@ import type { PortfolioItem } from "@/lib/types";
 
 type PortfolioGridProps = {
   items: PortfolioItem[];
+  startIndex?: number;
 };
 
-export function PortfolioGrid({ items }: PortfolioGridProps) {
+export function PortfolioGrid({ items, startIndex = 0 }: PortfolioGridProps) {
   if (items.length === 0) {
-    return <p className="py-24 text-center text-[12px] leading-6 text-muted">표시할 포트폴리오가 없습니다.</p>;
+    return <p className="portfolio-grid__empty">표시할 포트폴리오가 없습니다.</p>;
   }
 
   return (
-    <div className="grid gap-x-5 gap-y-10 sm:grid-cols-2 sm:gap-y-11 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-12">
+    <div className="portfolio-grid">
       {items.map((item, index) => (
-        <PortfolioCard key={item.slug} item={item} priority={index < 4} />
+        <PortfolioCard key={item.slug} item={item} priority={index < 3} index={index + startIndex} />
       ))}
     </div>
   );

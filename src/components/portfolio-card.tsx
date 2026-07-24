@@ -1,89 +1,45 @@
-"use client";
-
-import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
 
+import { PortfolioMedia } from "@/components/portfolio-media";
 import { getAreaLine, getProjectTitleLine, getSiteLine } from "@/lib/portfolio-display";
-import { getOptimizedImageUrl } from "@/lib/image-utils";
 import type { PortfolioItem } from "@/lib/types";
 
 type PortfolioCardProps = {
   item: PortfolioItem;
   priority?: boolean;
+  index?: number;
 };
 
-function getVerticalFocus(position: string) {
-  const normalizedPosition = position.trim().toLowerCase();
-  const parts = normalizedPosition.split(/\s+/);
-  const verticalValue = parts[1] || parts[0] || "center";
-
-  if (verticalValue === "top") {
-    return "0%";
-  }
-
-  if (verticalValue === "bottom") {
-    return "100%";
-  }
-
-  if (/^\d+(\.\d+)?%$/.test(verticalValue)) {
-    return verticalValue;
-  }
-
-  return "50%";
-}
-
-export function PortfolioCard({ item, priority = false }: PortfolioCardProps) {
+export function PortfolioCard({ item, priority = false, index = 0 }: PortfolioCardProps) {
   const originalCoverImage = item.coverImageUrl || item.coverImage;
-  const optimizedCoverImage = useMemo(
-    () =>
-      getOptimizedImageUrl(originalCoverImage, {
-        width: 1200,
-        quality: 82,
-        resize: "contain",
-      }),
-    [originalCoverImage],
-  );
-  const [imageSrc, setImageSrc] = useState(optimizedCoverImage);
-  const [showImage, setShowImage] = useState(Boolean(optimizedCoverImage));
   const siteLine = getSiteLine(item);
   const areaLine = getAreaLine(item);
   const coverObjectPosition = item.coverObjectPosition || "center center";
-  const verticalFocus = getVerticalFocus(coverObjectPosition);
 
   return (
-    <Link href={`/portfolio/${item.slug}`} className="group block">
-      <figure className="relative aspect-[3/2] w-full overflow-hidden bg-[#f6f6f4]">
-        {showImage ? (
-          <Image
-            src={imageSrc}
-            alt=""
-            width={1200}
-            height={900}
-            priority={priority}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="absolute left-0 h-auto w-full max-w-none transition-transform duration-500 ease-out group-hover:scale-[1.015]"
-            style={{
-              top: verticalFocus,
-              transform: `translateY(-${verticalFocus})`,
-            }}
-            onError={() => {
-              if (imageSrc !== originalCoverImage && originalCoverImage) {
-                setImageSrc(originalCoverImage);
-                return;
-              }
-
-              setShowImage(false);
-            }}
-          />
-        ) : null}
-      </figure>
-      <div className="mt-3.5 grid gap-1.5 leading-tight">
-        <h2 className="text-[12px] font-normal uppercase tracking-[0.025em] text-foreground sm:text-[13px]">
+    <Link href={`/portfolio/${item.slug}`} className="portfolio-card group">
+      <div className="portfolio-card__index">
+        <span>{String(index + 1).padStart(2, "0")}</span>
+        <span>{item.category}</span>
+      </div>
+      <PortfolioMedia
+        src={originalCoverImage}
+        alt={getProjectTitleLine(item)}
+        objectPosition={coverObjectPosition}
+        priority={priority}
+        sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+        width={1200}
+        className="portfolio-card__media"
+        imageClassName="transition-transform duration-500 ease-out group-hover:scale-[1.015]"
+      />
+      <div className="portfolio-card__content">
+        <h2 className="portfolio-card__title">
           {getProjectTitleLine(item)}
         </h2>
-        {siteLine ? <p className="text-[12px] leading-5 text-muted">{siteLine}</p> : null}
-        {areaLine ? <p className="text-[12px] leading-5 text-muted">{areaLine}</p> : null}
+        <div className="portfolio-card__facts">
+          {siteLine ? <p>{siteLine}</p> : null}
+          {areaLine ? <p>{areaLine}</p> : null}
+        </div>
       </div>
     </Link>
   );

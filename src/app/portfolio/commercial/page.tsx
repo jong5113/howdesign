@@ -12,9 +12,12 @@ export default async function CommercialPortfolioPage() {
   const portfolios = await getPortfoliosByCategory("commercial");
 
   return (
-    <div className="px-5 pb-20 pt-9 sm:px-10 sm:pt-12 lg:px-12">
-      <div className="mx-auto max-w-[1440px]">
-        <PortfolioFilter active="commercial" />
+    <div className="public-shell portfolio-page">
+      <div className="site-container">
+        <PortfolioFilter
+          active="commercial"
+          description="브랜드의 경험과 운영 방식을 공간으로 구체화한 상업 프로젝트입니다."
+        />
         <PortfolioGrid items={portfolios} />
       </div>
     </div>

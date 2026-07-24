@@ -2,108 +2,93 @@
 
 ## Scope
 
-- Comparison index: `/design-preview`
-- Concept 2: home, project detail, and contact previews
-- Concept 4: home, project detail, and contact previews
-- Removed routes: Concepts 1, 3, and 5
-- Operating regression routes: `/`, `/portfolio`, `/contact`, `/admin/projects`
+- Operating pages: `/`, `/portfolio`, category portfolio routes,
+  `/portfolio/[slug]`, and `/contact`
+- Protected regression routes: `/admin/projects`, `/admin/projects/new`, and
+  `/admin/projects/[id]/edit`
+- Removed route family: `/design-preview`
 
 ## Source Visual Truth
 
-The selected home previews are the visual source for extending each design
-language to project detail and contact:
+The selected Concept 4 preview remains the visual reference:
 
-- Concept 2 desktop: `design-qa-assets/concept-2-desktop-final.png`
-- Concept 2 mobile: `design-qa-assets/concept-2-mobile-final.png`
-- Concept 4 desktop: `design-qa-assets/concept-4-desktop-final.png`
-- Concept 4 mobile: `design-qa-assets/concept-4-mobile-final.png`
+- Home desktop: `design-qa-assets/concept-4-desktop-final.png`
+- Home mobile: `design-qa-assets/concept-4-mobile-final.png`
+- Project desktop: `design-qa-assets/concept-4-project-desktop-selected.png`
+- Project mobile: `design-qa-assets/concept-4-project-mobile-selected.png`
+- Contact desktop: `design-qa-assets/concept-4-contact-desktop-selected.png`
+- Contact mobile: `design-qa-assets/concept-4-contact-mobile-selected.png`
 
 ## Implementation Evidence
 
-- Concept 2 project:
-  `design-qa-assets/concept-2-project-desktop-selected.png`,
-  `design-qa-assets/concept-2-project-mobile-selected.png`,
-  and `design-qa-assets/concept-2-project-gallery-selected.png`
-- Concept 2 contact:
-  `design-qa-assets/concept-2-contact-desktop-selected.png` and
-  `design-qa-assets/concept-2-contact-mobile-selected.png`
-- Concept 4 project:
-  `design-qa-assets/concept-4-project-desktop-selected.png`,
-  `design-qa-assets/concept-4-project-mobile-selected.png`,
-  and `design-qa-assets/concept-4-project-gallery-selected.png`
-- Concept 4 contact:
-  `design-qa-assets/concept-4-contact-desktop-selected.png` and
-  `design-qa-assets/concept-4-contact-mobile-selected.png`
-- Updated index:
-  `design-qa-assets/design-preview-index-desktop.png` and
-  `design-qa-assets/design-preview-index-mobile.png`
-- Operating regression:
-  `design-qa-assets/operating-home-mobile.png`
+- Home:
+  `design-qa-assets/operating-concept4-home-desktop.png` and
+  `design-qa-assets/operating-concept4-home-mobile.png`
+- Portfolio:
+  `design-qa-assets/operating-concept4-portfolio-desktop.png` and
+  `design-qa-assets/operating-concept4-portfolio-mobile.png`
+- Project:
+  `design-qa-assets/operating-concept4-detail-desktop.png`,
+  `design-qa-assets/operating-concept4-detail-mobile.png`, and
+  `design-qa-assets/operating-concept4-detail-gallery-mobile.png`
+- Contact:
+  `design-qa-assets/operating-concept4-contact-desktop.png` and
+  `design-qa-assets/operating-concept4-contact-mobile.png`
 
-Side-by-side source and implementation comparisons:
+Side-by-side source and operating comparisons:
 
-- `design-qa-assets/compare-concept-2-project-selected.jpg`
-- `design-qa-assets/compare-concept-2-contact-selected.jpg`
-- `design-qa-assets/compare-concept-4-project-selected.jpg`
-- `design-qa-assets/compare-concept-4-contact-selected.jpg`
+- `design-qa-assets/compare-concept4-operating-home.jpg`
+- `design-qa-assets/compare-concept4-operating-detail.jpg`
+- `design-qa-assets/compare-concept4-operating-contact.jpg`
 
 ## Normalization
 
-- Desktop browser viewport: 1440x1024 CSS px, device scale factor 1
-- Desktop captured pixels: 1425x1013 at 72 dpi after scrollbar normalization
+- Desktop browser viewport: 1440x1024 CSS px
+- Desktop captured pixels: 1425x1013 after scrollbar normalization
 - Mobile browser viewport: 390x844 CSS px
-- Mobile captured pixels: 375x812 at 72 dpi after scrollbar normalization
-- Embedded mobile preview frame: 390px outer width, 379px scrollable client width
-- State: live published Supabase data, DAEDONG JANGU project detail, top and
-  gallery scroll states, unauthenticated admin state
+- Mobile captured pixels: 375x812 after scrollbar normalization
+- State: live Supabase project data and unauthenticated admin protection
 
 ## Visual Comparison
 
-- Concept 2 retains the selected charcoal palette, warm beige navigation,
-  large serif headlines, uppercase metadata, cinematic imagery, and restrained
-  divider lines across home, project, and contact.
-- Concept 4 retains the selected ivory background, thin black rules, large
-  sans-serif typography, numbered information architecture, and explicit
-  project-data grid across all three pages.
-- Both project previews use the same Supabase project, making image treatment,
-  hierarchy, and metadata density directly comparable.
-- Full-view composition was checked through each preview frame's complete
-  internal scroll height.
-- Focused gallery captures were required because gallery rhythm and image
-  proportions were too small to judge from the first viewport alone.
-
-## Findings
-
-- No open P0, P1, or P2 visual differences remain.
-- Typography: display and metadata scales remain consistent with each selected
-  source direction on desktop and mobile.
-- Spacing: no outer-page or embedded-frame horizontal overflow was found.
-- Colors: Concept 2 and Concept 4 remain visually distinct and use the source
-  palette without introducing new decorative colors.
-- Image quality: real project covers and gallery images render with optimized
-  URLs, original-URL retry, and text-free failure placeholders.
-- Copy: project metadata and contact information are readable, correctly
-  wrapped, and preserve Korean/English hierarchy.
+- The operating home preserves Concept 4's ivory field, thin black rules,
+  asymmetric introduction grid, numbered featured project, and image-led
+  hierarchy without preview framing.
+- WORK uses the same typography and rule system in a three-column desktop,
+  two-column tablet, and one-column mobile project grid.
+- Project detail preserves the selected large project heading, four-column
+  metadata table, full-width hero, structured information rows, and ruled
+  gallery.
+- Contact preserves the selected large heading, numbered contact data, wide
+  image, and consultation grid.
+- No open P0, P1, or P2 visual difference remains.
+- No desktop or mobile horizontal overflow was found.
+- Card media uses a fixed 3:2 frame, CSS cover, stored focal position, optimized
+  URL retry, original URL retry, and a text-free failure placeholder.
 
 ## Functional Checks
 
-- Seven retained preview routes return 200.
-- `/design-preview/concept-1`, `concept-3`, and `concept-5` return 404.
-- Preview navigation moves between home, project detail, contact, and the
-  comparison list.
-- Email and telephone links use `mailto:` and `tel:` correctly.
-- Desktop and mobile frames scroll independently.
-- Broken-image count was zero on every retained preview route.
-- `/`, `/portfolio`, `/contact`, and `/admin/projects` retain their existing
-  header, content, and login state.
-- Final browser-console check showed no application errors or warnings.
+- Logo navigates to `/`.
+- WORK navigates to `/portfolio`.
+- CONTACT navigates to `/contact`.
+- Portfolio cards navigate to their current database slug.
+- The header is `position: static` and is outside the viewport after scrolling.
+- Lightbox opens from a project image, moves previous/next, closes with X, and
+  closes with Escape.
+- No broken images were found in the tested desktop or mobile viewports.
+- Portfolio category filter links remain hidden.
+- `/design-preview` returns 404.
+- Admin list, new, and edit routes retain their login protection and return
+  their expected page titles.
+- Admin CRUD and upload source files were not changed.
+- The current Supabase slug for the checked Daedong project is
+  `/portfolio/project-1781072022010`; the older
+  `/portfolio/daedong-eel-yeouido` value is not present in current data.
 
-## Comparison History
+## Verification
 
-- The first selected-concept comparison found no actionable P0/P1/P2 visual
-  mismatch.
-- Unused Concept 1, 3, and 5 scene code, CSS, metadata, routes, and QA assets
-  were removed before the final comparison.
-- A preview-only unused prop warning was removed before final lint.
+- `npm.cmd run typecheck`: passed
+- `npm.cmd run lint`: passed with no warnings or errors
+- `npm.cmd run build`: passed
 
 final result: passed
