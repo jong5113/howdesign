@@ -541,6 +541,9 @@ img {
 .project-architecture-gallery {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
+  width: 100%;
+  max-width: 1240px;
+  margin-inline: auto;
 }
 
 .project-gallery-item {
