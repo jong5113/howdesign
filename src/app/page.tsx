@@ -67,7 +67,6 @@ export default async function HomePage() {
               objectPosition={featuredProject.coverObjectPosition}
               priority
               sizes="(max-width: 767px) 100vw, 68vw"
-              width={1800}
               className="home-feature__media"
             />
           </Link>

@@ -1,5 +1,25 @@
 import type { NextConfig } from "next";
 
+function getSupabaseHostname() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  if (!supabaseUrl) {
+    return null;
+  }
+
+  try {
+    const url = new URL(supabaseUrl);
+
+    return url.protocol === "https:" && url.hostname.endsWith(".supabase.co")
+      ? url.hostname
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+const supabaseHostname = getSupabaseHostname();
+
 const nextConfig: NextConfig = {
   images: {
     localPatterns: [
@@ -21,10 +41,15 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
-      {
-        protocol: "https",
-        hostname: "**.supabase.co",
-      },
+      ...(supabaseHostname
+        ? [
+            {
+              protocol: "https" as const,
+              hostname: supabaseHostname,
+              pathname: "/storage/v1/object/public/**",
+            },
+          ]
+        : []),
     ],
   },
 };

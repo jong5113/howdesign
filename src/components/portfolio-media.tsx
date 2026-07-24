@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
-import { useMemo, useState } from "react";
-
-import { getOptimizedImageUrl } from "@/lib/image-utils";
+import {
+  ResilientImage,
+  useImageFallbackState,
+} from "@/components/resilient-image";
 
 type PortfolioMediaProps = {
   src?: string | null;
@@ -11,7 +11,6 @@ type PortfolioMediaProps = {
   objectPosition?: string;
   priority?: boolean;
   sizes: string;
-  width?: number;
   className?: string;
   imageClassName?: string;
 };
@@ -22,40 +21,27 @@ export function PortfolioMedia({
   objectPosition = "center center",
   priority = false,
   sizes,
-  width = 1600,
   className = "",
   imageClassName = "",
 }: PortfolioMediaProps) {
   const originalImage = src?.trim() || "";
-  const optimizedImage = useMemo(
-    () =>
-      getOptimizedImageUrl(originalImage, {
-        width,
-        quality: 84,
-        resize: "contain",
-      }),
-    [originalImage, width],
-  );
-  const [failedImages, setFailedImages] = useState<string[]>([]);
-  const imageSrc = failedImages.includes(optimizedImage) ? originalImage : optimizedImage;
-  const isVisible = Boolean(imageSrc) && !failedImages.includes(imageSrc);
+  const { getImageMode, handleImageError } = useImageFallbackState();
+  const imageMode = getImageMode(originalImage);
+  const isVisible = Boolean(originalImage) && imageMode !== "broken";
 
   return (
     <div className={`relative overflow-hidden bg-[#ecece7] ${className}`} aria-hidden={!isVisible}>
       {isVisible ? (
-        <Image
-          src={imageSrc}
+        <ResilientImage
+          src={originalImage}
+          mode={imageMode}
+          onLoadError={handleImageError}
           alt={alt}
           fill
           priority={priority}
           sizes={sizes}
           className={`block object-cover ${imageClassName}`}
           style={{ objectPosition }}
-          onError={() => {
-            setFailedImages((currentImages) =>
-              currentImages.includes(imageSrc) ? currentImages : [...currentImages, imageSrc],
-            );
-          }}
         />
       ) : null}
     </div>

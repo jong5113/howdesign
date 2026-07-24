@@ -1,9 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { Fragment, MouseEvent, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 
-import { getOptimizedImageUrl } from "@/lib/image-utils";
+import {
+  ResilientImage,
+  useImageFallbackState,
+} from "@/components/resilient-image";
 
 export type ProjectLightboxImage = {
   src: string;
@@ -22,18 +24,14 @@ export function ProjectLightboxGallery({
   afterFirst,
 }: ProjectLightboxGalleryProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [originalImageUrls, setOriginalImageUrls] = useState<Set<string>>(
-    () => new Set(),
-  );
-  const [brokenImageUrls, setBrokenImageUrls] = useState<Set<string>>(
-    () => new Set(),
-  );
+  const { getImageMode, handleImageError } = useImageFallbackState();
   const visibleImages = useMemo(
     () =>
       images.filter(
-        (image) => image.src.trim() && !brokenImageUrls.has(image.src),
+        (image) =>
+          image.src.trim() && getImageMode(image.src) !== "broken",
       ),
-    [brokenImageUrls, images],
+    [getImageMode, images],
   );
   const safeActiveIndex =
     activeIndex === null || visibleImages.length === 0
@@ -114,58 +112,6 @@ export function ProjectLightboxGallery({
     }
   };
 
-  const markImageForOriginalUrl = useCallback((src: string) => {
-    setOriginalImageUrls((currentUrls) => {
-      const nextUrls = new Set(currentUrls);
-      nextUrls.add(src);
-      return nextUrls;
-    });
-  }, []);
-
-  const markImageAsBroken = useCallback((src: string) => {
-    setBrokenImageUrls((currentUrls) => {
-      const nextUrls = new Set(currentUrls);
-      nextUrls.add(src);
-      return nextUrls;
-    });
-  }, []);
-
-  const handleImageError = useCallback(
-    (src: string) => {
-      if (!originalImageUrls.has(src)) {
-        markImageForOriginalUrl(src);
-        return;
-      }
-
-      markImageAsBroken(src);
-    },
-    [markImageAsBroken, markImageForOriginalUrl, originalImageUrls],
-  );
-
-  const getGalleryImageSrc = useCallback(
-    (src: string) =>
-      originalImageUrls.has(src)
-        ? src
-        : getOptimizedImageUrl(src, {
-            width: 1400,
-            quality: 82,
-            resize: "contain",
-          }),
-    [originalImageUrls],
-  );
-
-  const getLightboxImageSrc = useCallback(
-    (src: string) =>
-      originalImageUrls.has(src)
-        ? src
-        : getOptimizedImageUrl(src, {
-            width: 2000,
-            quality: 85,
-            resize: "contain",
-          }),
-    [originalImageUrls],
-  );
-
   if (visibleImages.length === 0) {
     return <div className="project-gallery-empty" aria-hidden="true" />;
   }
@@ -182,8 +128,10 @@ export function ProjectLightboxGallery({
                 onClick={() => openLightbox(index)}
                 aria-label={`Open image ${index + 1}`}
               >
-                <Image
-                  src={getGalleryImageSrc(image.src)}
+                <ResilientImage
+                  src={image.src}
+                  mode={getImageMode(image.src)}
+                  onLoadError={handleImageError}
                   alt={image.alt ?? ""}
                   width={1400}
                   height={933}
@@ -195,8 +143,6 @@ export function ProjectLightboxGallery({
                   className="project-gallery-image block h-auto w-full"
                   priority={index === 0}
                   decoding="async"
-                  unoptimized={originalImageUrls.has(image.src)}
-                  onError={() => handleImageError(image.src)}
                 />
               </button>
               {index > 0 ? <figcaption>{String(index + 1).padStart(2, "0")} / INTERIOR VIEW</figcaption> : null}
@@ -235,8 +181,10 @@ export function ProjectLightboxGallery({
               </button>
             ) : null}
 
-            <Image
-              src={getLightboxImageSrc(activeImage.src)}
+            <ResilientImage
+              src={activeImage.src}
+              mode={getImageMode(activeImage.src)}
+              onLoadError={handleImageError}
               alt={activeImage.alt ?? ""}
               width={2000}
               height={1333}
@@ -244,8 +192,6 @@ export function ProjectLightboxGallery({
               className="max-h-[85vh] max-w-[78vw] object-contain sm:max-w-[84vw] lg:max-w-[86vw]"
               loading="eager"
               decoding="async"
-              unoptimized={originalImageUrls.has(activeImage.src)}
-              onError={() => handleImageError(activeImage.src)}
             />
 
             {hasMultipleImages ? (
