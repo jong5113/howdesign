@@ -1,9 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { DragEvent, useState } from "react";
 import Link from "next/link";
 
 import { getStoragePathFromPublicUrl, PORTFOLIO_BUCKET } from "@/lib/admin-project-utils";
+import {
+  moveItemByOffset,
+  reorderItems,
+  type DropPlacement,
+} from "@/lib/admin-project-order";
 import { hasSupabaseConfig, supabaseClient } from "@/lib/supabase/client";
 import type { PortfolioCategory } from "@/lib/types";
 
@@ -46,6 +51,12 @@ function getProjectStoragePaths(project: AdminProject, images: ProjectImage[]) {
 export function AdminProjectList({ initialProjects, initialError = "" }: AdminProjectListProps) {
   const [projects, setProjects] = useState<AdminProject[]>(initialProjects);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [draggedProjectId, setDraggedProjectId] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<{
+    projectId: string;
+    placement: DropPlacement;
+  } | null>(null);
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState(initialError);
 
@@ -106,6 +117,103 @@ export function AdminProjectList({ initialProjects, initialError = "" }: AdminPr
     setMessage(`${getProjectLabel(project)} ${field} 값을 변경했습니다.`);
   }
 
+  async function saveProjectOrder(nextProjects: AdminProject[], previousProjects: AdminProject[]) {
+    const orderedProjects = nextProjects.map((project, index) => ({
+      ...project,
+      display_order: index + 1,
+    }));
+
+    setProjects(orderedProjects);
+    setIsSavingOrder(true);
+    setMessage("");
+    setErrorMessage("");
+
+    try {
+      const response = await fetch("/admin/api/projects/reorder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectIds: orderedProjects.map((project) => project.id) }),
+      });
+      const result = (await response.json().catch(() => null)) as { message?: string } | null;
+
+      if (!response.ok) {
+        throw new Error(result?.message || "프로젝트 순서를 저장하지 못했습니다.");
+      }
+
+      setMessage("홈페이지 프로젝트 노출 순서를 저장했습니다.");
+    } catch (error) {
+      console.error("[Admin projects] Failed to save project order.", error);
+      setProjects(previousProjects);
+      setErrorMessage(error instanceof Error ? error.message : "프로젝트 순서를 저장하지 못했습니다.");
+    } finally {
+      setIsSavingOrder(false);
+    }
+  }
+
+  function handleDragStart(event: DragEvent<HTMLButtonElement>, projectId: string) {
+    if (isSavingOrder) {
+      event.preventDefault();
+      return;
+    }
+
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", projectId);
+    setDraggedProjectId(projectId);
+    setMessage("");
+    setErrorMessage("");
+  }
+
+  function handleDragOver(event: DragEvent<HTMLDivElement>, projectId: string) {
+    const sourceId = draggedProjectId || event.dataTransfer.getData("text/plain");
+
+    if (!sourceId || sourceId === projectId || isSavingOrder) {
+      return;
+    }
+
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const placement = event.clientY < bounds.top + bounds.height / 2 ? "before" : "after";
+    setDropTarget({ projectId, placement });
+  }
+
+  async function handleDrop(event: DragEvent<HTMLDivElement>, targetId: string) {
+    event.preventDefault();
+    const sourceId = draggedProjectId || event.dataTransfer.getData("text/plain");
+    const placement = dropTarget?.projectId === targetId ? dropTarget.placement : "before";
+    const previousProjects = projects;
+    const nextProjects = reorderItems(projects, sourceId, targetId, placement);
+
+    setDraggedProjectId(null);
+    setDropTarget(null);
+
+    if (nextProjects === projects) {
+      return;
+    }
+
+    await saveProjectOrder(nextProjects, previousProjects);
+  }
+
+  function handleDragEnd() {
+    setDraggedProjectId(null);
+    setDropTarget(null);
+  }
+
+  async function moveProject(projectId: string, offset: -1 | 1) {
+    if (isSavingOrder) {
+      return;
+    }
+
+    const previousProjects = projects;
+    const nextProjects = moveItemByOffset(projects, projectId, offset);
+
+    if (nextProjects === projects) {
+      return;
+    }
+
+    await saveProjectOrder(nextProjects, previousProjects);
+  }
+
   async function deleteProject(project: AdminProject) {
     if (!supabaseClient) {
       setErrorMessage("Supabase 클라이언트를 사용할 수 없습니다.");
@@ -161,10 +269,20 @@ export function AdminProjectList({ initialProjects, initialError = "" }: AdminPr
   return (
     <section className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <Link href="/admin/projects/new" className="text-[12px] uppercase tracking-[0.09em] underline">
-          New Project
-        </Link>
-        <button type="button" onClick={loadProjects} className="text-[12px] uppercase tracking-[0.09em]">
+        <div className="grid gap-1">
+          <Link href="/admin/projects/new" className="text-[12px] uppercase tracking-[0.09em] underline">
+            New Project
+          </Link>
+          <p className="text-[12px] leading-5 text-muted">
+            왼쪽 DRAG 핸들을 끌어 홈페이지 노출 순서를 변경하세요.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={loadProjects}
+          disabled={isLoading || isSavingOrder}
+          className="text-[12px] uppercase tracking-[0.09em] disabled:text-muted"
+        >
           Refresh
         </button>
       </div>
@@ -176,17 +294,65 @@ export function AdminProjectList({ initialProjects, initialError = "" }: AdminPr
       ) : null}
       {message ? <p className="text-[13px] text-muted">{message}</p> : null}
       {isLoading ? <p className="text-[13px] text-muted">Loading projects...</p> : null}
+      {isSavingOrder ? <p className="text-[13px] text-muted">Saving project order...</p> : null}
       {!isLoading && projects.length === 0 ? (
         <p className="text-[13px] text-muted">등록된 프로젝트가 없습니다.</p>
       ) : null}
 
       {projects.length > 0 ? (
         <div className="grid border-t border-line">
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className="grid gap-4 border-b border-line py-5 text-[13px] lg:grid-cols-[84px_1.4fr_0.8fr_0.8fr_0.6fr_0.6fr_0.6fr_auto] lg:items-center"
-            >
+          {projects.map((project, index) => {
+            const isDropTarget = dropTarget?.projectId === project.id;
+            const dropTargetClass = isDropTarget
+              ? dropTarget.placement === "before"
+                ? "shadow-[inset_0_2px_0_#111]"
+                : "shadow-[inset_0_-2px_0_#111]"
+              : "";
+
+            return (
+              <div
+                key={project.id}
+                onDragOver={(event) => handleDragOver(event, project.id)}
+                onDrop={(event) => handleDrop(event, project.id)}
+                className={`grid gap-4 border-b border-line py-5 text-[13px] transition-opacity lg:grid-cols-[60px_84px_1.4fr_0.8fr_0.8fr_0.6fr_0.6fr_0.6fr_auto] lg:items-center ${
+                  draggedProjectId === project.id ? "opacity-40" : ""
+                } ${dropTargetClass}`}
+              >
+                <div className="flex items-center gap-2 lg:grid lg:justify-items-center">
+                  <button
+                    type="button"
+                    draggable={!isSavingOrder}
+                    onDragStart={(event) => handleDragStart(event, project.id)}
+                    onDragEnd={handleDragEnd}
+                    disabled={isSavingOrder}
+                    className="cursor-grab touch-none select-none border border-line px-2 py-2 text-[9px] uppercase tracking-[0.08em] active:cursor-grabbing disabled:cursor-not-allowed disabled:text-muted"
+                    aria-label={`${getProjectLabel(project)} 순서 드래그`}
+                    title="드래그해서 순서 변경"
+                  >
+                    Drag
+                  </button>
+                  <span className="min-w-5 text-center text-[11px] text-muted">{index + 1}</span>
+                  <div className="flex gap-1 lg:hidden">
+                    <button
+                      type="button"
+                      onClick={() => moveProject(project.id, -1)}
+                      disabled={isSavingOrder || index === 0}
+                      className="h-8 w-8 border border-line disabled:text-muted"
+                      aria-label={`${getProjectLabel(project)} 위로 이동`}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveProject(project.id, 1)}
+                      disabled={isSavingOrder || index === projects.length - 1}
+                      className="h-8 w-8 border border-line disabled:text-muted"
+                      aria-label={`${getProjectLabel(project)} 아래로 이동`}
+                    >
+                      ↓
+                    </button>
+                  </div>
+                </div>
               <div className="aspect-[3/2] w-24 bg-[#f6f6f6] lg:w-full">
                 {project.cover_image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -235,13 +401,15 @@ export function AdminProjectList({ initialProjects, initialError = "" }: AdminPr
                 <button
                   type="button"
                   onClick={() => deleteProject(project)}
+                  disabled={isSavingOrder}
                   className="uppercase tracking-[0.09em] text-muted"
                 >
                   Delete
                 </button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       ) : null}
     </section>

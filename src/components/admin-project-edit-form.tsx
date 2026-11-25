@@ -29,7 +29,6 @@ type ProjectFormState = {
   coverImageUrl: string;
   featured: boolean;
   published: boolean;
-  displayOrder: string;
   coverObjectPosition: string;
 };
 
@@ -48,7 +47,6 @@ type ProjectRow = {
   cover_image_url: string | null;
   featured: boolean | null;
   published: boolean | null;
-  display_order: number | null;
   cover_object_position?: string | null;
 };
 
@@ -105,7 +103,6 @@ const emptyForm: ProjectFormState = {
   coverImageUrl: "",
   featured: false,
   published: true,
-  displayOrder: "100",
   coverObjectPosition: "center center",
 };
 
@@ -181,7 +178,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
       let { data: project, error: projectError } = await supabaseClient
         .from("portfolio_projects")
         .select(
-          "id, title, slug, category, subtitle, location, area, scope, duration, year, description, cover_image_url, cover_object_position, featured, published, display_order",
+          "id, title, slug, category, subtitle, location, area, scope, duration, year, description, cover_image_url, cover_object_position, featured, published",
         )
         .eq("id", projectId)
         .maybeSingle<ProjectRow>();
@@ -190,7 +187,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
         const fallbackResult = await supabaseClient
           .from("portfolio_projects")
           .select(
-            "id, title, slug, category, subtitle, location, area, scope, duration, year, description, cover_image_url, featured, published, display_order",
+            "id, title, slug, category, subtitle, location, area, scope, duration, year, description, cover_image_url, featured, published",
           )
           .eq("id", projectId)
           .maybeSingle<ProjectRow>();
@@ -244,7 +241,6 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
         coverImageUrl,
         featured: Boolean(project.featured),
         published: Boolean(project.published),
-        displayOrder: String(project.display_order ?? 100),
         coverObjectPosition: project.cover_object_position || "center center",
       });
       setImages(nextImages);
@@ -452,7 +448,6 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
         cover_object_position: form.coverObjectPosition.trim() || "center center",
         featured: form.featured,
         published: form.published,
-        display_order: Number(form.displayOrder) || 100,
       };
 
       let { error: projectError } = await client
@@ -586,16 +581,6 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
             onChange={(event) => updateField("year", event.target.value)}
             className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
             placeholder="예: May. 2026"
-          />
-        </label>
-        <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">
-          Display Order
-          <input
-            value={form.displayOrder}
-            onChange={(event) => updateField("displayOrder", event.target.value)}
-            className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
-            inputMode="numeric"
-            placeholder="낮은 숫자가 먼저 노출됩니다"
           />
         </label>
         <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">

@@ -167,6 +167,7 @@ export function normalizeProject(
 }
 
 const PUBLIC_PORTFOLIO_REVALIDATE_SECONDS = 600;
+export const PORTFOLIO_CACHE_TAG = "portfolio-projects";
 
 async function fetchProjectList(options: { featured?: boolean; category?: PortfolioCategory } = {}) {
   if (!hasSupabaseConfig || !supabaseClient) {
@@ -368,23 +369,23 @@ async function getPortfolioBySlugUncached(slug: string) {
 const getCachedPublishedPortfolios = unstable_cache(
   getPublishedPortfoliosUncached,
   ["published-portfolios-v2"],
-  { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS },
+  { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS, tags: [PORTFOLIO_CACHE_TAG] },
 );
 
 const getCachedFeaturedPortfolios = unstable_cache(
   getFeaturedPortfoliosUncached,
   ["featured-portfolios-v2"],
-  { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS },
+  { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS, tags: [PORTFOLIO_CACHE_TAG] },
 );
 
 const getCachedPortfoliosByCategory = unstable_cache(
   getPortfoliosByCategoryUncached,
   ["portfolios-by-category-v2"],
-  { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS },
+  { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS, tags: [PORTFOLIO_CACHE_TAG] },
 );
 
 export const getPortfolioBySlug = unstable_cache(
   getPortfolioBySlugUncached,
   ["portfolio-by-slug"],
-  { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS },
+  { revalidate: PUBLIC_PORTFOLIO_REVALIDATE_SECONDS, tags: [PORTFOLIO_CACHE_TAG] },
 );

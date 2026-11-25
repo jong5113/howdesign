@@ -48,7 +48,7 @@ export default async function AdminProjectsPage() {
             <h1 className="text-[22px] font-normal tracking-[0.02em]">{isAuthed ? "Project Management" : "Admin Login"}</h1>
             <p className="max-w-2xl text-[13px] leading-6 text-muted">
               {isAuthed
-                ? "Manage portfolio visibility, featured status, image order, and project content."
+                ? "Drag projects into the order they should appear on the website."
                 : "Enter the administrator password to manage portfolio projects."}
             </p>
           </div>

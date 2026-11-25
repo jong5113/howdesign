@@ -33,7 +33,6 @@ type ProjectFormState = {
   description: string;
   featured: boolean;
   published: boolean;
-  displayOrder: string;
   coverObjectPosition: string;
 };
 
@@ -64,7 +63,6 @@ const initialFormState: ProjectFormState = {
   description: "",
   featured: false,
   published: true,
-  displayOrder: "100",
   coverObjectPosition: "center center",
 };
 
@@ -234,6 +232,19 @@ export function AdminProjectForm() {
       const slug = createSlug(form.slug);
       const storageFolder = createSafeStorageFolder(slug, form.title);
       const uploadedPaths: string[] = [];
+      const { data: lastProject, error: orderError } = await client
+        .from("portfolio_projects")
+        .select("display_order")
+        .not("display_order", "is", null)
+        .order("display_order", { ascending: false })
+        .limit(1)
+        .maybeSingle<{ display_order: number | null }>();
+
+      if (orderError) {
+        throw new Error(`프로젝트 노출 순서를 확인하지 못했습니다. ${formatSupabaseError(orderError)}`);
+      }
+
+      const nextDisplayOrder = (lastProject?.display_order ?? 0) + 1;
       setSubmitStatus("uploading");
       setMessage("Uploading images...");
 
@@ -310,7 +321,7 @@ export function AdminProjectForm() {
         cover_object_position: form.coverObjectPosition.trim() || "center center",
         featured: form.featured,
         published: form.published,
-        display_order: Number(form.displayOrder) || 100,
+        display_order: nextDisplayOrder,
       };
 
       let { data: project, error: projectError } = await client
@@ -449,16 +460,6 @@ export function AdminProjectForm() {
             onChange={(event) => updateField("year", event.target.value)}
             className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
             placeholder="예: May. 2026"
-          />
-        </label>
-        <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">
-          Display Order
-          <input
-            value={form.displayOrder}
-            onChange={(event) => updateField("displayOrder", event.target.value)}
-            className="border-b border-line bg-transparent py-2 text-[15px] normal-case tracking-normal outline-none"
-            inputMode="numeric"
-            placeholder="낮은 숫자가 먼저 노출됩니다"
           />
         </label>
         <label className="grid gap-2 text-[12px] uppercase tracking-[0.08em]">

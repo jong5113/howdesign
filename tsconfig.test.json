@@ -11,6 +11,8 @@
   },
   "include": [
     "src/lib/image-utils.ts",
+    "src/lib/admin-project-order.ts",
+    "tests/admin-project-order.test.ts",
     "tests/image-utils.test.ts"
   ]
 }
