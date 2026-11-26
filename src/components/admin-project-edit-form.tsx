@@ -175,13 +175,21 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
         return;
       }
 
-      let { data: project, error: projectError } = await supabaseClient
-        .from("portfolio_projects")
-        .select(
-          "id, title, slug, category, subtitle, location, area, scope, duration, year, description, cover_image_url, cover_object_position, featured, published",
-        )
-        .eq("id", projectId)
-        .maybeSingle<ProjectRow>();
+      const [projectResult, { data: projectImages, error: imagesError }] = await Promise.all([
+        supabaseClient
+          .from("portfolio_projects")
+          .select(
+            "id, title, slug, category, subtitle, location, area, scope, duration, year, description, cover_image_url, cover_object_position, featured, published",
+          )
+          .eq("id", projectId)
+          .maybeSingle<ProjectRow>(),
+        supabaseClient
+          .from("portfolio_images")
+          .select("id, image_url, alt, display_order")
+          .eq("project_id", projectId)
+          .order("display_order", { ascending: true }),
+      ]);
+      let { data: project, error: projectError } = projectResult;
 
       if (projectError && projectError.message.includes("cover_object_position")) {
         const fallbackResult = await supabaseClient
@@ -202,12 +210,6 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
         setIsLoading(false);
         return;
       }
-
-      const { data: projectImages, error: imagesError } = await supabaseClient
-        .from("portfolio_images")
-        .select("id, image_url, alt, display_order")
-        .eq("project_id", projectId)
-        .order("display_order", { ascending: true });
 
       if (imagesError) {
         console.error("[Admin edit] Failed to load project images.", imagesError);
@@ -692,7 +694,7 @@ export function AdminProjectEditForm({ projectId }: AdminProjectEditFormProps) {
           {images.map((image, index) => (
             <figure key={image.id} className="grid gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={getImageUrl(image)} alt="" className="aspect-[3/2] w-full object-cover" />
+              <img src={getImageUrl(image)} alt="" loading="lazy" decoding="async" className="aspect-[3/2] w-full object-cover" />
               <figcaption className="grid gap-2 text-[11px] uppercase tracking-[0.08em] text-muted">
                 <p>Display Order: {index + 1}</p>
                 <label className="flex items-center gap-2 text-foreground">

@@ -3,6 +3,7 @@
 import { DragEvent, useState } from "react";
 import Link from "next/link";
 
+import { PortfolioMedia } from "@/components/portfolio-media";
 import { getStoragePathFromPublicUrl, PORTFOLIO_BUCKET } from "@/lib/admin-project-utils";
 import {
   moveItemByOffset,
@@ -36,6 +37,9 @@ type AdminProjectListProps = {
   initialProjects: AdminProject[];
   initialError?: string;
 };
+
+const storageUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, "");
+const publicObjectPrefix = storageUrl && `${storageUrl}/storage/v1/object/public/`;
 
 function getProjectLabel(project: AdminProject) {
   return project.title || project.subtitle || project.slug || "Untitled project";
@@ -174,7 +178,9 @@ export function AdminProjectList({ initialProjects, initialError = "" }: AdminPr
     event.dataTransfer.dropEffect = "move";
     const bounds = event.currentTarget.getBoundingClientRect();
     const placement = event.clientY < bounds.top + bounds.height / 2 ? "before" : "after";
-    setDropTarget({ projectId, placement });
+    if (dropTarget?.projectId !== projectId || dropTarget.placement !== placement) {
+      setDropTarget({ projectId, placement });
+    }
   }
 
   async function handleDrop(event: DragEvent<HTMLDivElement>, targetId: string) {
@@ -354,9 +360,11 @@ export function AdminProjectList({ initialProjects, initialError = "" }: AdminPr
                   </div>
                 </div>
               <div className="aspect-[3/2] w-24 bg-[#f6f6f6] lg:w-full">
-                {project.cover_image_url ? (
+                {publicObjectPrefix && project.cover_image_url?.startsWith(publicObjectPrefix) ? (
+                  <PortfolioMedia src={project.cover_image_url} sizes="96px" className="h-full" />
+                ) : project.cover_image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={project.cover_image_url} alt="" className="h-full w-full object-cover" />
+                  <img src={project.cover_image_url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                 ) : null}
               </div>
               <div className="grid gap-1">

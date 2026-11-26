@@ -138,7 +138,7 @@ export function ProjectLightboxGallery({
                   sizes={
                     index === 0
                       ? "(min-width: 1426px) 1426px, 100vw"
-                      : "(min-width: 1426px) 665px, (min-width: 1024px) calc(50vw - 48px), 100vw"
+                      : "(min-width: 1426px) 665px, (min-width: 768px) calc(50vw - 48px), calc(100vw - 40px)"
                   }
                   className="project-gallery-image block h-auto w-full"
                   priority={index === 0}

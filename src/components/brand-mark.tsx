@@ -5,6 +5,7 @@ import Image from "next/image";
 type BrandMarkProps = {
   className?: string;
   imageClassName?: string;
+  sizes?: string;
   textClassName?: string;
   priority?: boolean;
   variant?: "header" | "footer";
@@ -38,6 +39,7 @@ function getLogoSrc() {
 export function BrandMark({
   className = "",
   imageClassName = "h-auto w-[165px] object-contain sm:w-[215px] lg:w-[235px]",
+  sizes,
   textClassName = "text-[18px] font-normal tracking-[0.08em] sm:text-[22px]",
   priority = false,
   fallbackText = "주식회사 하우디자인",
@@ -52,6 +54,7 @@ export function BrandMark({
           alt="주식회사 하우디자인"
           width={1254}
           height={588}
+          sizes={sizes}
           priority={priority}
           className={imageClassName}
         />

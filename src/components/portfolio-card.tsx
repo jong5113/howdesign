@@ -27,7 +27,7 @@ export function PortfolioCard({ item, priority = false, index = 0 }: PortfolioCa
         alt={getProjectTitleLine(item)}
         objectPosition={coverObjectPosition}
         priority={priority}
-        sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+        sizes="(max-width: 639px) calc(100vw - 40px), (max-width: 767px) calc(100vw - 64px), (max-width: 1023px) calc(50vw - 44px), (max-width: 1759px) calc(33.33vw - 48px), 539px"
         className="portfolio-card__media"
         imageClassName="transition-transform duration-500 ease-out group-hover:scale-[1.015]"
       />

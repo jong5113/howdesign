@@ -66,7 +66,7 @@ export default async function HomePage() {
               alt={getProjectTitleLine(featuredProject)}
               objectPosition={featuredProject.coverObjectPosition}
               priority
-              sizes="(max-width: 767px) 100vw, 68vw"
+              sizes="(max-width: 639px) calc(100vw - 40px), (max-width: 767px) calc(100vw - 64px), (max-width: 1023px) calc(66vw - 42px), (max-width: 1759px) calc(66vw - 63px), 1099px"
               className="home-feature__media"
             />
           </Link>
@@ -84,6 +84,7 @@ export default async function HomePage() {
         <PortfolioGrid
           items={selectedProjects.length > 0 ? selectedProjects : featuredPortfolios}
           startIndex={selectedProjects.length > 0 ? 1 : 0}
+          prioritizeFirst={false}
         />
       </section>
 

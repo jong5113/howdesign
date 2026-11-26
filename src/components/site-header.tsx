@@ -21,6 +21,7 @@ export function SiteHeader() {
           <BrandMark
             placement="header"
             priority
+            sizes="(max-width: 639px) 116px, (max-width: 1023px) 140px, 154px"
             imageClassName="h-auto w-[116px] object-contain sm:w-[140px] lg:w-[154px]"
           />
         </Link>
